@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ArrowLeft, MessageCircle, Phone, Mail, CreditCard } from "lucide-react"
-
 interface WhatsAppQuoteProps {
   bookingData: any
   onBack: () => void
@@ -31,6 +30,36 @@ export default function WhatsAppQuote({ bookingData, onBack, onPayNow, onWhatsAp
       onPayNow(customerData)
     }
   }
+
+
+  const calculatePricing = () => {
+    const baseRates: { [key: string]: number } = {
+      "swift-dzire": 2500,
+      "maruti-ertiga": 3000,
+      "toyota-innova": 3500,
+      "innova-crysta": 4000,
+      "tempo-13": 6500,
+      "tempo-17": 7500,
+      "tempo-21": 8500,
+    }
+
+    const baseRate = baseRates[bookingData.selectedVehicle?.id] || 3000
+    const days = bookingData.numberOfDays
+    const serviceMultiplier = bookingData.serviceType === "chauffeur" ? 1.3 : 1
+
+    const subtotal = baseRate * days * serviceMultiplier
+    const taxes = subtotal * 0.18
+    const total = subtotal + taxes
+
+    return {
+      baseRate,
+      subtotal: Math.round(subtotal),
+      taxes: Math.round(taxes),
+      total: Math.round(total),
+    }
+  }
+
+  const pricing = calculatePricing()
 
   const isValidNumber = customerData.whatsappNumber.length === 10 && /^\d{10}$/.test(customerData.whatsappNumber)
   const isValidEmail = !customerData.email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerData.email)
@@ -87,6 +116,13 @@ export default function WhatsAppQuote({ bookingData, onBack, onPayNow, onWhatsAp
             <div className="flex justify-between">
               <span className="font-medium text-emerald-800">Capacity:</span>
               <span className="text-emerald-700">{bookingData.selectedVehicle?.seats} seats</span>
+            </div>
+            <div className="flex justify-between font-semibold text-lg border-t border-emerald-300 pt-2 mt-2">
+              <span className="text-emerald-800">Estimated Total:</span>
+              <span className="text-emerald-900">₹{pricing.total.toLocaleString()}</span>
+            </div>
+            <div className="text-xs text-emerald-600 text-right">
+              (Base: ₹{pricing.subtotal.toLocaleString()} + Tax: ₹{pricing.taxes.toLocaleString()})
             </div>
           </div>
         </div>

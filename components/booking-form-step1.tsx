@@ -29,6 +29,7 @@ export default function BookingFormStep1({
     endTime: initialData.endTime || "18:00",
     numberOfDays: initialData.numberOfDays || 1,
     roundTrip: initialData.roundTrip || false,
+    selectedVehicle: initialData.selectedVehicle || null,
   })
 
   const addStopover = () => {
@@ -41,14 +42,14 @@ export default function BookingFormStep1({
   const removeStopover = (index: number) => {
     setFormData((prev) => ({
       ...prev,
-      stopovers: prev.stopovers.filter((_, i) => i !== index),
+      stopovers: prev.stopovers.filter((_: any, i: number) => i !== index),
     }))
   }
 
   const updateStopover = (index: number, value: string) => {
     setFormData((prev) => ({
       ...prev,
-      stopovers: prev.stopovers.map((stop, i) => (i === index ? value : stop)),
+      stopovers: prev.stopovers.map((stop: any, i: number) => (i === index ? value : stop)),
     }))
   }
 
@@ -71,8 +72,29 @@ export default function BookingFormStep1({
       endTime: "18:00",
       numberOfDays: 1,
       roundTrip: false,
+      selectedVehicle: null,
     })
   }
+
+  const calculateEstimatedPrice = () => {
+  if (!formData.selectedVehicle || !formData.numberOfDays) return 0
+  
+  const baseRates: { [key: string]: number } = {
+    "swift-dzire": 2500,
+    "maruti-ertiga": 3000, 
+    "toyota-innova": 3500,
+    "innova-crysta": 4000,
+    "tempo-13": 6500,
+    "tempo-17": 7500,
+    "tempo-21": 8500,
+  }
+  
+  const baseRate = baseRates[formData.selectedVehicle?.id] || 3000
+  const serviceMultiplier = serviceType === "chauffeur" ? 1.3 : 1
+  const subtotal = baseRate * formData.numberOfDays * serviceMultiplier
+  const taxes = subtotal * 0.18
+  return Math.round(subtotal + taxes)
+}
 
   const handleContinue = () => {
     const requiredFields =
@@ -134,29 +156,29 @@ export default function BookingFormStep1({
           {/* Stopovers - Only for Chauffeur Service */}
           {serviceType === "chauffeur" && (
             <div className="space-y-1">
-              <Label className="text-emerald-800 font-medium text-sm">Add Stopover (Optional)</Label>
-              {formData.stopovers.slice(0, 2).map((stopover, index) => (
+                <Label className="text-emerald-800 font-medium text-sm">Add Stopover (Optional)</Label>
+                {formData.stopovers.slice(0, 2).map((stopover: string, index: number) => (
                 <div key={index} className="flex gap-2">
                   <Input
-                    value={stopover}
-                    onChange={(e) => updateStopover(index, e.target.value)}
-                    placeholder="Enter stopover location"
-                    className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
+                  value={stopover}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateStopover(index, e.target.value)}
+                  placeholder="Enter stopover location"
+                  className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
                   />
                   {formData.stopovers.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => removeStopover(index)}
-                      className="rounded-lg border-red-300 text-red-600 hover:bg-red-50 h-9 w-9 p-0"
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeStopover(index)}
+                    className="rounded-lg border-red-300 text-red-600 hover:bg-red-50 h-9 w-9 p-0"
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
                   )}
                 </div>
-              ))}
-              {formData.stopovers.length < 3 && (
+                ))}
+                {formData.stopovers.length < 3 && (
                 <Button
                   type="button"
                   variant="outline"

@@ -90,6 +90,12 @@ export default function DateTimePicker({ startDate, endDate, startTime, endTime,
   const today = new Date().toISOString().split("T")[0]
   const numberOfDays = calculateDays(selectedStartDate, selectedEndDate)
 
+  function calculateEstimatedPrice() {
+    // Example: ₹1500 per day, minimum 1 day
+    const pricePerDay = 1500
+    return numberOfDays * pricePerDay
+  }
+
   return (
     <div className="space-y-4">
       {/* Date & Time Selection - Compact Layout */}
@@ -121,11 +127,10 @@ export default function DateTimePicker({ startDate, endDate, startTime, endTime,
                       variant={selectedStartTime === time ? "default" : "outline"}
                       size="sm"
                       onClick={() => setSelectedStartTime(time)}
-                      className={`text-xs px-1 py-1 h-7 ${
-                        selectedStartTime === time
+                      className={`text-xs px-1 py-1 h-7 ${selectedStartTime === time
                           ? "bg-emerald-600 text-white"
                           : "border-emerald-300 text-emerald-600 hover:bg-emerald-50 bg-transparent"
-                      }`}
+                        }`}
                     >
                       {time}
                     </Button>
@@ -169,11 +174,10 @@ export default function DateTimePicker({ startDate, endDate, startTime, endTime,
                       variant={selectedEndTime === time ? "default" : "outline"}
                       size="sm"
                       onClick={() => setSelectedEndTime(time)}
-                      className={`text-xs px-1 py-1 h-7 ${
-                        selectedEndTime === time
+                      className={`text-xs px-1 py-1 h-7 ${selectedEndTime === time
                           ? "bg-emerald-600 text-white"
                           : "border-emerald-300 text-emerald-600 hover:bg-emerald-50 bg-transparent"
-                      }`}
+                        }`}
                     >
                       {time}
                     </Button>
@@ -191,14 +195,22 @@ export default function DateTimePicker({ startDate, endDate, startTime, endTime,
         </Card>
       </div>
 
-      {/* Duration Summary - Compact */}
+      {/* Duration & Price Summary - Compact */}
       {selectedStartDate && selectedEndDate && (
-        <div className="text-center p-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-lg">
-          <div className="text-lg font-bold">
-            {numberOfDays} Day{numberOfDays > 1 ? "s" : ""}
-          </div>
-          <div className="text-emerald-100 text-xs">
-            {selectedStartDate} {selectedStartTime} → {selectedEndDate} {selectedEndTime}
+        <div className="p-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-lg">
+          <div className="flex justify-between items-center">
+            <div>
+              <div className="text-lg font-bold">
+                {numberOfDays} Day{numberOfDays > 1 ? "s" : ""}
+              </div>
+              <div className="text-emerald-100 text-xs">
+                {selectedStartDate} {selectedStartTime} → {selectedEndDate} {selectedEndTime}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-lg font-bold">₹{calculateEstimatedPrice().toLocaleString()}</div>
+              <div className="text-emerald-100 text-xs">Est. Total</div>
+            </div>
           </div>
         </div>
       )}

@@ -16,9 +16,8 @@ export default function BookingFormStep2({ onContinue, onBack, serviceType, book
   }
 
   return (
-    <div className="max-h-[calc(100vh-200px)] overflow-hidden flex flex-col">
-      {/* Vehicle Selection with Availability */}
-      <div className="flex-1">
+    <div className="h-[calc(100vh-200px)] overflow-hidden flex flex-col">
+      <div className="flex-1 min-h-0">
         <VehicleSelectionWithAvailability
           startDate={bookingData?.startDate || ""}
           endDate={bookingData?.endDate || ""}

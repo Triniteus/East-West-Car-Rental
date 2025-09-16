@@ -31,9 +31,9 @@ export default function PaymentGateway({ bookingData, onBack, onPaymentSuccess }
   const calculatePricing = () => {
     const baseRates: { [key: string]: number } = {
       "swift-dzire": 2500,
-      "maruti-ertiga": 3500,
-      "toyota-innova": 4500,
-      "innova-crysta": 5500,
+      "maruti-ertiga": 3000,
+      "toyota-innova": 3500,
+      "innova-crysta": 4000,
       "tempo-13": 6500,
       "tempo-17": 7500,
       "tempo-21": 8500,
@@ -44,10 +44,9 @@ export default function PaymentGateway({ bookingData, onBack, onPaymentSuccess }
     const serviceMultiplier = bookingData.serviceType === "chauffeur" ? 1.3 : 1
 
     const subtotal = baseRate * days * serviceMultiplier
-    const taxes = subtotal * 0.18 // 18% GST
+    const taxes = subtotal * 0.18
     const total = subtotal + taxes
-
-    const advanceAmount = total * 0.25 // 25% advance
+    const advanceAmount = total * 0.25
 
     return {
       baseRate,
@@ -199,11 +198,10 @@ export default function PaymentGateway({ bookingData, onBack, onPaymentSuccess }
               <Label className="text-emerald-800 font-medium">Payment Option</Label>
               <div className="grid grid-cols-1 gap-3">
                 <div
-                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    paymentMethod === "advance"
+                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === "advance"
                       ? "border-emerald-500 bg-emerald-50"
                       : "border-emerald-200 hover:border-emerald-300"
-                  }`}
+                    }`}
                   onClick={() => setPaymentMethod("advance")}
                 >
                   <div className="flex items-center justify-between">
@@ -223,11 +221,10 @@ export default function PaymentGateway({ bookingData, onBack, onPaymentSuccess }
                 </div>
 
                 <div
-                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    paymentMethod === "full"
+                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === "full"
                       ? "border-emerald-500 bg-emerald-50"
                       : "border-emerald-200 hover:border-emerald-300"
-                  }`}
+                    }`}
                   onClick={() => setPaymentMethod("full")}
                 >
                   <div className="flex items-center justify-between">

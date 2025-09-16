@@ -18,6 +18,22 @@ export default function WhatsAppThankYou({ bookingData, customerData, onBack, on
   const [autoPopupDone, setAutoPopupDone] = useState(false)
 
   const generateWhatsAppMessage = () => {
+    // Add pricing calculation
+    const baseRates: { [key: string]: number } = {
+      "swift-dzire": 2500,
+      "maruti-ertiga": 3000,
+      "toyota-innova": 3500,
+      "innova-crysta": 4000,
+      "tempo-13": 6500,
+      "tempo-17": 7500,
+      "tempo-21": 8500,
+    }
+
+    const baseRate = baseRates[bookingData.selectedVehicle?.id] || 3000
+    const serviceMultiplier = bookingData.serviceType === "chauffeur" ? 1.3 : 1
+    const subtotal = baseRate * bookingData.numberOfDays * serviceMultiplier
+    const total = Math.round(subtotal * 1.18) // Including 18% tax
+
     const message = `Hello East West Team,
 
 I would like a quote for:
@@ -26,16 +42,17 @@ I would like a quote for:
 - Pickup: ${bookingData.pickupLocation}
 ${bookingData.serviceType === "chauffeur" && bookingData.dropLocation ? `- Drop: ${bookingData.dropLocation}` : ""}
 ${bookingData.stopovers?.filter(Boolean).length > 0 ? `- Stopovers: ${bookingData.stopovers.filter(Boolean).join(", ")}` : ""}
-- Start: ${bookingData.startDate} ${bookingData.startTime}
+- Start: ${bookingData.startDate} ${bookingData.startTime}  
 - End: ${bookingData.endDate} ${bookingData.endTime}
 - Duration: ${bookingData.numberOfDays} day${bookingData.numberOfDays > 1 ? "s" : ""}
 ${bookingData.serviceType === "chauffeur" && bookingData.roundTrip ? "- Round Trip: Yes" : ""}
+- Estimated Amount: ₹${total.toLocaleString()}
 
 Customer: ${customerData.name}
 WhatsApp: +91-${customerData.whatsappNumber}
 ${customerData.email ? `Email: ${customerData.email}` : ""}
 
-Thank you!`
+Please confirm final pricing. Thank you!`
 
     return encodeURIComponent(message)
   }
@@ -144,9 +161,8 @@ Thank you!`
           <Button
             onClick={openWhatsApp}
             disabled={autoPopupDone}
-            className={`${
-              autoPopupDone ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
-            } text-white rounded-xl py-3 px-6`}
+            className={`${autoPopupDone ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
+              } text-white rounded-xl py-3 px-6`}
           >
             <MessageCircle className="w-5 h-5 mr-2" />
             {autoPopupDone ? "WhatsApp Already Opened" : "Open WhatsApp Now"}

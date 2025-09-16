@@ -106,7 +106,7 @@ Book your ride at eastwestrentals.com`
                     <div>
                       <p className="font-medium text-emerald-900">Travel Period</p>
                       <p className="text-emerald-700">
-                        {paymentData.bookingData.startDate} {paymentData.bookingData.startTime} -{" "}
+                        {paymentData.bookingData.startDate} {paymentData.bookingData.startTime} to {" "}
                         {paymentData.bookingData.endDate} {paymentData.bookingData.endTime}
                       </p>
                       <p className="text-sm text-emerald-600">
