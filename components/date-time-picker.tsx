@@ -3,9 +3,9 @@
 import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
-import { Calendar } from "lucide-react"
+import { Calendar22 } from "@/components/calendar"
+import { calculateDays } from "@/lib/booking-utils"
 
 interface DateTimePickerProps {
   startDate: string
@@ -22,36 +22,16 @@ interface DateTimePickerProps {
 }
 
 export default function DateTimePicker({ startDate, endDate, startTime, endTime, onChange }: DateTimePickerProps) {
-  const [selectedStartDate, setSelectedStartDate] = useState(startDate)
-  const [selectedEndDate, setSelectedEndDate] = useState(endDate)
+  const [selectedStartDate, setSelectedStartDate] = useState<string>()
+  const [selectedEndDate, setSelectedEndDate] = useState<string>()
   const [selectedStartTime, setSelectedStartTime] = useState(startTime)
   const [selectedEndTime, setSelectedEndTime] = useState(endTime)
 
   // Common time options
   const timeOptions = [
-    "06:00",
-    "07:00",
-    "08:00",
-    "09:00",
-    "10:00",
-    "11:00",
-    "12:00",
-    "13:00",
-    "14:00",
-    "15:00",
-    "16:00",
-    "17:00",
-    "18:00",
+    "06:00", "07:00", "08:00", "09:00", "10:00", "11:00",
+    "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00",
   ]
-
-  // Calculate number of days
-  const calculateDays = useCallback((start: string, end: string) => {
-    if (!start || !end) return 1
-    const startDate = new Date(start)
-    const endDate = new Date(end)
-    const diffTime = Math.abs(endDate.getTime() - startDate.getTime())
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1
-  }, [])
 
   // Memoized onChange callback to prevent infinite loops
   const handleChange = useCallback(
@@ -67,7 +47,7 @@ export default function DateTimePicker({ startDate, endDate, startTime, endTime,
         })
       }
     },
-    [onChange, calculateDays],
+    [onChange],
   )
 
   // Update parent component when values change
@@ -84,11 +64,18 @@ export default function DateTimePicker({ startDate, endDate, startTime, endTime,
       setSelectedEndDate(endDate)
       setSelectedStartTime(startTime)
       setSelectedEndTime(endTime)
+    } else {
+      // Set defaults
+      const today = new Date().toISOString().split("T")[0]
+      const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split("T")[0]
+      setSelectedStartDate(today)
+      setSelectedEndDate(tomorrow)
+      setSelectedStartTime("09:00")
+      setSelectedEndTime("18:00")
     }
   }, []) // Empty dependency array - only run once on mount
 
-  const today = new Date().toISOString().split("T")[0]
-  const numberOfDays = calculateDays(selectedStartDate, selectedEndDate)
+  const numberOfDays = calculateDays(selectedStartDate ?? "", selectedEndDate ?? "")
 
   function calculateEstimatedPrice() {
     // Example: ₹1500 per day, minimum 1 day
@@ -96,120 +83,115 @@ export default function DateTimePicker({ startDate, endDate, startTime, endTime,
     return numberOfDays * pricePerDay
   }
 
+  function formatTime12Hr(time: string) {
+    if (!time) return ""
+    const [hourStr, minute] = time.split(":")
+    let hour = parseInt(hourStr, 10)
+    const ampm = hour >= 12 ? "PM" : "AM"
+    hour = hour % 12 || 12 // convert "0" → "12"
+    return `${hour}:${minute} ${ampm}`
+  }
+
   return (
     <div className="space-y-4">
-      {/* Date & Time Selection - Compact Layout */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Date & Time Selection - Responsive Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
         {/* Start Date & Time */}
         <Card className="backdrop-blur-sm bg-white/80 border-emerald-200/50">
-          <CardContent className="p-4">
-            <Label className="text-emerald-800 font-medium flex items-center gap-2 mb-3 text-sm">
-              <Calendar className="w-3 h-3" />
-              Pickup
-            </Label>
-
-            <div className="space-y-3">
-              <Input
-                type="date"
+          <CardContent className="p-3 md:p-4">
+            <div className="mb-3">
+              <Calendar22
+                title="Pickup"
                 value={selectedStartDate}
-                onChange={(e) => setSelectedStartDate(e.target.value)}
-                className="rounded-lg border-emerald-300 focus:border-emerald-500 text-sm"
-                min={today}
-                required
+                onChange={setSelectedStartDate}
               />
+            </div>
 
-              <div className="space-y-2">
-                <div className="grid grid-cols-3 gap-1">
-                  {timeOptions.slice(0, 6).map((time) => (
-                    <Button
-                      key={time}
-                      type="button"
-                      variant={selectedStartTime === time ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedStartTime(time)}
-                      className={`text-xs px-1 py-1 h-7 ${selectedStartTime === time
-                          ? "bg-emerald-600 text-white"
-                          : "border-emerald-300 text-emerald-600 hover:bg-emerald-50 bg-transparent"
-                        }`}
-                    >
-                      {time}
-                    </Button>
-                  ))}
-                </div>
-                <Input
-                  type="time"
-                  value={selectedStartTime}
-                  onChange={(e) => setSelectedStartTime(e.target.value)}
-                  className="rounded-lg border-emerald-300 focus:border-emerald-500 text-xs h-8"
-                />
+            <div className="space-y-2">
+              {/* Quick time buttons - responsive grid */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-1">
+                {timeOptions.slice(0, 6).map((time) => (
+                  <Button
+                    key={time}
+                    type="button"
+                    variant={selectedStartTime === time ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedStartTime(time)}
+                    className={`text-xs px-1 py-1 h-6 md:h-7 ${selectedStartTime === time
+                      ? "bg-emerald-600 text-white"
+                      : "border-emerald-300 text-emerald-600 hover:bg-emerald-50 bg-transparent"
+                      }`}
+                  >
+                    {time}
+                  </Button>
+                ))}
               </div>
+              <Input
+                type="time"
+                value={selectedStartTime}
+                onChange={(e) => setSelectedStartTime(e.target.value)}
+                className="rounded-lg border-emerald-300 focus:border-emerald-500 text-xs h-8"
+              />
             </div>
           </CardContent>
         </Card>
 
         {/* End Date & Time */}
         <Card className="backdrop-blur-sm bg-white/80 border-emerald-200/50">
-          <CardContent className="p-4">
-            <Label className="text-emerald-800 font-medium flex items-center gap-2 mb-3 text-sm">
-              <Calendar className="w-3 h-3" />
-              Return
-            </Label>
-
-            <div className="space-y-3">
-              <Input
-                type="date"
+          <CardContent className="p-3 md:p-4">
+            <div className="mb-3">
+              <Calendar22
+                title="Return"
                 value={selectedEndDate}
-                onChange={(e) => setSelectedEndDate(e.target.value)}
-                className="rounded-lg border-emerald-300 focus:border-emerald-500 text-sm"
-                min={selectedStartDate || today}
-                required
+                onChange={setSelectedEndDate}
               />
+            </div>
 
-              <div className="space-y-2">
-                <div className="grid grid-cols-3 gap-1">
-                  {timeOptions.slice(6, 12).map((time) => (
-                    <Button
-                      key={time}
-                      type="button"
-                      variant={selectedEndTime === time ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedEndTime(time)}
-                      className={`text-xs px-1 py-1 h-7 ${selectedEndTime === time
-                          ? "bg-emerald-600 text-white"
-                          : "border-emerald-300 text-emerald-600 hover:bg-emerald-50 bg-transparent"
-                        }`}
-                    >
-                      {time}
-                    </Button>
-                  ))}
-                </div>
-                <Input
-                  type="time"
-                  value={selectedEndTime}
-                  onChange={(e) => setSelectedEndTime(e.target.value)}
-                  className="rounded-lg border-emerald-300 focus:border-emerald-500 text-xs h-8"
-                />
+            <div className="space-y-2">
+              {/* Quick time buttons - responsive grid */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-1">
+                {timeOptions.slice(6, 12).map((time) => (
+                  <Button
+                    key={time}
+                    type="button"
+                    variant={selectedEndTime === time ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedEndTime(time)}
+                    className={`text-xs px-1 py-1 h-6 md:h-7 ${selectedEndTime === time
+                      ? "bg-emerald-600 text-white"
+                      : "border-emerald-300 text-emerald-600 hover:bg-emerald-50 bg-transparent"
+                      }`}
+                  >
+                    {time}
+                  </Button>
+                ))}
               </div>
+              <Input
+                type="time"
+                value={selectedEndTime}
+                onChange={(e) => setSelectedEndTime(e.target.value)}
+                className="rounded-lg border-emerald-300 focus:border-emerald-500 text-xs h-8"
+              />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Duration & Price Summary - Compact */}
+      {/* Duration & Price Summary - Responsive */}
       {selectedStartDate && selectedEndDate && (
         <div className="p-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-lg">
-          <div className="flex justify-between items-center">
-            <div>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+            <div className="flex-1">
               <div className="text-lg font-bold">
                 {numberOfDays} Day{numberOfDays > 1 ? "s" : ""}
               </div>
               <div className="text-emerald-100 text-xs">
-                {selectedStartDate} {selectedStartTime} → {selectedEndDate} {selectedEndTime}
+                {selectedStartDate} {formatTime12Hr(selectedStartTime)} → {selectedEndDate} {formatTime12Hr(selectedEndTime)}
               </div>
             </div>
             <div className="text-right">
               <div className="text-lg font-bold">₹{calculateEstimatedPrice().toLocaleString()}</div>
-              <div className="text-emerald-100 text-xs">Est. Total</div>
+              <div className="text-emerald-100 text-xs">Est. Base Price</div>
             </div>
           </div>
         </div>

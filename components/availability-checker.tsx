@@ -6,12 +6,14 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CheckCircle, XCircle, Clock, RefreshCw } from "lucide-react"
+import { getAvailableVehiclesForService } from "@/lib/booking-utils"
 
 interface AvailabilityCheckerProps {
   startDate: string
   endDate: string
   startTime: string
   endTime: string
+  serviceType: "self-drive" | "chauffeur"
   onAvailabilityChange: (availability: any) => void
 }
 
@@ -20,11 +22,14 @@ export default function AvailabilityChecker({
   endDate,
   startTime,
   endTime,
+  serviceType,
   onAvailabilityChange,
 }: AvailabilityCheckerProps) {
   const [availability, setAvailability] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const vehicles = getAvailableVehiclesForService(serviceType)
 
   const checkAvailability = async () => {
     if (!startDate || !endDate) return
@@ -70,8 +75,8 @@ export default function AvailabilityChecker({
   if (!startDate || !endDate) {
     return (
       <Card className="backdrop-blur-sm bg-blue-50/80 border-blue-200/50">
-        <CardContent className="p-6 text-center">
-          <Clock className="w-12 h-12 text-blue-400 mx-auto mb-4" />
+        <CardContent className="p-4 md:p-6 text-center">
+          <Clock className="w-10 h-10 md:w-12 md:h-12 text-blue-400 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-blue-900 mb-2">Select Your Dates</h3>
           <p className="text-blue-700">Choose your travel dates to check vehicle availability</p>
         </CardContent>
@@ -82,7 +87,7 @@ export default function AvailabilityChecker({
   if (isLoading) {
     return (
       <Card className="backdrop-blur-sm bg-white/80 border-emerald-200/50">
-        <CardContent className="p-6">
+        <CardContent className="p-4 md:p-6">
           <div className="flex items-center gap-3 mb-4">
             <RefreshCw className="w-5 h-5 text-emerald-600 animate-spin" />
             <h3 className="text-lg font-semibold text-emerald-900">Checking Availability...</h3>
@@ -90,12 +95,12 @@ export default function AvailabilityChecker({
           <div className="space-y-3">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="flex items-center gap-4">
-                <Skeleton className="w-12 h-12 rounded-lg" />
+                <Skeleton className="w-10 h-10 md:w-12 md:h-12 rounded-lg" />
                 <div className="flex-1">
-                  <Skeleton className="h-4 w-32 mb-2" />
-                  <Skeleton className="h-3 w-24" />
+                  <Skeleton className="h-4 w-24 md:w-32 mb-2" />
+                  <Skeleton className="h-3 w-16 md:w-24" />
                 </div>
-                <Skeleton className="w-20 h-6 rounded-full" />
+                <Skeleton className="w-16 md:w-20 h-6 rounded-full" />
               </div>
             ))}
           </div>
@@ -107,8 +112,8 @@ export default function AvailabilityChecker({
   if (error) {
     return (
       <Card className="backdrop-blur-sm bg-red-50/80 border-red-200/50">
-        <CardContent className="p-6 text-center">
-          <XCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+        <CardContent className="p-4 md:p-6 text-center">
+          <XCircle className="w-10 h-10 md:w-12 md:h-12 text-red-500 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-red-900 mb-2">Error Checking Availability</h3>
           <p className="text-red-700 mb-4">{error}</p>
           <Button
@@ -131,15 +136,15 @@ export default function AvailabilityChecker({
 
   return (
     <Card className="backdrop-blur-sm bg-white/80 border-emerald-200/50">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-6">
+      <CardContent className="p-4 md:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-2">
           <div>
             <h3 className="text-lg font-semibold text-emerald-900">Vehicle Availability</h3>
             <p className="text-emerald-700 text-sm">
               {availability.searchDates.startDate} to {availability.searchDates.endDate}
             </p>
           </div>
-          <div className="text-right">
+          <div className="text-left sm:text-right">
             <div className="text-2xl font-bold text-emerald-900">
               {availableVehicles}/{totalVehicles}
             </div>
@@ -149,13 +154,13 @@ export default function AvailabilityChecker({
 
         <div className="space-y-4">
           {availability.availability.map((vehicle: any) => (
-            <AvailabilityItem key={vehicle.vehicleId} vehicle={vehicle} />
+            <AvailabilityItem key={vehicle.vehicleId} vehicle={vehicle} vehicles={vehicles} />
           ))}
         </div>
 
-        <div className="mt-6 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+        <div className="mt-6 p-3 md:p-4 bg-emerald-50 rounded-xl border border-emerald-200">
           <div className="flex items-start gap-3">
-            <CheckCircle className="w-5 h-5 text-emerald-600 mt-0.5" />
+            <CheckCircle className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
             <div>
               <h4 className="font-semibold text-emerald-900 mb-1">Real-time Availability</h4>
               <p className="text-sm text-emerald-700">
@@ -179,23 +184,16 @@ export default function AvailabilityChecker({
   )
 }
 
-function AvailabilityItem({ vehicle }: { vehicle: any }) {
-  const vehicleNames: { [key: string]: string } = {
-    "swift-dzire": "Swift Dzire",
-    "maruti-ertiga": "Maruti Ertiga",
-    "toyota-innova": "Toyota Innova",
-    "innova-crysta": "Innova Crysta",
-    "tempo-13": "Tempo Traveller 13",
-    "tempo-17": "Tempo Traveller 17",
-    "tempo-21": "Tempo Traveller 21",
-  }
+function AvailabilityItem({ vehicle, vehicles }: { vehicle: any; vehicles: any[] }) {
+  const vehicleData = vehicles.find(v => v.id === vehicle.vehicleId)
+  const vehicleName = vehicleData?.name || vehicle.vehicleId
 
   return (
-    <div className="flex items-center justify-between p-4 rounded-xl border border-emerald-200/50 bg-emerald-50/30">
-      <div className="flex items-center gap-4">
-        <div className={`w-3 h-3 rounded-full ${vehicle.isAvailable ? "bg-green-500" : "bg-red-500"} animate-pulse`} />
+    <div className="flex items-center justify-between p-3 md:p-4 rounded-xl border border-emerald-200/50 bg-emerald-50/30">
+      <div className="flex items-center gap-3 md:gap-4">
+        <div className={`w-3 h-3 rounded-full ${vehicle.isAvailable ? "bg-green-500" : "bg-red-500"} animate-pulse flex-shrink-0`} />
         <div>
-          <h4 className="font-medium text-emerald-900">{vehicleNames[vehicle.vehicleId]}</h4>
+          <h4 className="font-medium text-emerald-900">{vehicleName}</h4>
           <p className="text-sm text-emerald-600">
             {vehicle.availableCount} of {vehicle.totalCount} available
           </p>

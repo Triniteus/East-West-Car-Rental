@@ -3,68 +3,29 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { CheckCircle, XCircle, Clock, RefreshCw, Users, Check } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { CheckCircle, XCircle, Clock, RefreshCw, Users, Check, Info } from "lucide-react"
 import Image from "next/image"
+import {
+  getAvailableVehiclesForService,
+  calculateSelfDrivePrice,
+  calculateChauffeurPrice,
+  calculateDays,
+  calculateHours,
+  type VehicleData,
+  type PricingBreakdown,
+  type ServiceArea
+} from "@/lib/booking-utils"
 
 interface VehicleSelectionWithAvailabilityProps {
   startDate: string
   endDate: string
   startTime: string
   endTime: string
-  onVehicleSelect: (vehicle: any) => void
+  onVehicleSelect: (vehicle: VehicleData) => void
   serviceType: "self-drive" | "chauffeur"
+  bookingData?: any
 }
-
-const vehicles = [
-  {
-    id: "swift-dzire",
-    name: "Swift Dzire",
-    seats: 4,
-    image: "/images/swift-dzire.png",
-    description: "Compact sedan",
-    features: ["AC", "GPS"],
-  },
-  {
-    id: "maruti-ertiga",
-    name: "Maruti Ertiga",
-    seats: 7,
-    image: "/images/maruti-ertiga.png",
-    description: "Family MPV",
-    features: ["AC", "7 Seater"],
-  },
-  {
-    id: "toyota-innova",
-    name: "Toyota Innova",
-    seats: 7,
-    image: "/images/toyota-innova.png",
-    description: "Premium MPV",
-    features: ["Premium AC", "Comfortable"],
-  },
-  {
-    id: "innova-crysta",
-    name: "Innova Crysta",
-    seats: 7,
-    image: "/images/innova-crysta.png",
-    description: "Luxury MPV",
-    features: ["Luxury", "Entertainment"],
-  },
-  {
-    id: "tempo-13",
-    name: "Tempo Traveller 13",
-    seats: 13,
-    image: "/images/tempo-13.png",
-    description: "Group travel",
-    features: ["13 Seater", "AC"],
-  },
-  {
-    id: "tempo-17",
-    name: "Tempo Traveller 17",
-    seats: 17,
-    image: "/images/tempo-17.png",
-    description: "Large group",
-    features: ["17 Seater", "AC"],
-  },
-]
 
 export default function VehicleSelectionWithAvailability({
   startDate,
@@ -73,12 +34,58 @@ export default function VehicleSelectionWithAvailability({
   endTime,
   onVehicleSelect,
   serviceType,
+  bookingData,
 }: VehicleSelectionWithAvailabilityProps) {
+  const [vehicles, setVehicles] = useState<VehicleData[]>([])
+  const [vehiclesLoading, setVehiclesLoading] = useState(true)
   const [availability, setAvailability] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null)
   const [autoNavigating, setAutoNavigating] = useState(false)
+  const [priceBreakdowns, setPriceBreakdowns] = useState<{ [key: string]: boolean }>({})
+  const [vehiclePrices, setVehiclePrices] = useState<{ [key: string]: PricingBreakdown | null }>({})
+
+  // Fetch vehicles on component mount
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      setVehiclesLoading(true)
+      try {
+        const fetchedVehicles = await getAvailableVehiclesForService(serviceType)
+        setVehicles(fetchedVehicles)
+      } catch (error) {
+        console.error('Error fetching vehicles:', error)
+        setError('Failed to load vehicles')
+      } finally {
+        setVehiclesLoading(false)
+      }
+    }
+
+    fetchVehicles()
+  }, [serviceType])
+
+  // Calculate prices when vehicles are loaded or booking data changes
+  useEffect(() => {
+    if (vehicles.length > 0 && startDate && endDate) {
+      calculateAllPrices()
+    }
+  }, [vehicles, bookingData, startDate, endDate, startTime, endTime])
+
+  const calculateAllPrices = async () => {
+    const newPrices: { [key: string]: PricingBreakdown | null } = {}
+
+    for (const vehicle of vehicles) {
+      try {
+        const pricing = await calculateVehiclePrice(vehicle.id)
+        newPrices[vehicle.id] = pricing
+      } catch (error) {
+        console.error(`Error calculating price for ${vehicle.id}:`, error)
+        newPrices[vehicle.id] = null
+      }
+    }
+
+    setVehiclePrices(newPrices)
+  }
 
   const checkAvailability = async () => {
     if (!startDate || !endDate) return
@@ -111,10 +118,10 @@ export default function VehicleSelectionWithAvailability({
   }
 
   useEffect(() => {
-    if (startDate && endDate) {
+    if (startDate && endDate && vehicles.length > 0) {
       checkAvailability()
     }
-  }, [startDate, endDate, startTime, endTime])
+  }, [startDate, endDate, startTime, endTime, vehicles])
 
   const handleVehicleSelect = (vehicleId: string) => {
     if (availability) {
@@ -127,26 +134,32 @@ export default function VehicleSelectionWithAvailability({
     setAutoNavigating(true)
     setTimeout(() => {
       const vehicle = vehicles.find((v) => v.id === vehicleId)
-      onVehicleSelect(vehicle)
+      if (vehicle) {
+        onVehicleSelect(vehicle)
+      }
     }, 1500)
   }
 
-  const calculateVehiclePrice = (vehicleId: string) => {
-    const baseRates: { [key: string]: number } = {
-      "swift-dzire": 2500,
-      "maruti-ertiga": 3000,
-      "toyota-innova": 3500,
-      "innova-crysta": 4000,
-      "tempo-13": 6500,
-      "tempo-17": 7500,
-      "tempo-21": 8500,
+  const calculateVehiclePrice = async (vehicleId: string): Promise<PricingBreakdown | null> => {
+    try {
+      const days = calculateDays(startDate, endDate)
+      const estimatedKms = bookingData?.estimatedKms || 150
+      const serviceArea: ServiceArea = bookingData?.serviceArea || {
+        withinMumbai: true,
+        naviMumbai: false,
+        outsideMumbai: false,
+      }
+
+      if (serviceType === "self-drive") {
+        return await calculateSelfDrivePrice(vehicleId, days, estimatedKms)
+      } else {
+        const hours = calculateHours(startTime, endTime)
+        return await calculateChauffeurPrice(vehicleId, days, hours, estimatedKms, serviceArea)
+      }
+    } catch (error) {
+      console.error('Price calculation error:', error)
+      return null
     }
-    const baseRate = baseRates[vehicleId] || 3000
-    const days = Math.max(1, Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1)
-    const serviceMultiplier = serviceType === "chauffeur" ? 1.3 : 1
-    const subtotal = baseRate * days * serviceMultiplier
-    const taxes = subtotal * 0.18
-    return Math.round(subtotal + taxes)
   }
 
   const getVehicleAvailability = (vehicleId: string) => {
@@ -154,6 +167,13 @@ export default function VehicleSelectionWithAvailability({
     return (
       availability.availability.find((v: any) => v.vehicleId === vehicleId) || { isAvailable: true, availableCount: 0 }
     )
+  }
+
+  const togglePriceBreakdown = (vehicleId: string) => {
+    setPriceBreakdowns(prev => ({
+      ...prev,
+      [vehicleId]: !prev[vehicleId]
+    }))
   }
 
   if (!startDate || !endDate) {
@@ -170,18 +190,20 @@ export default function VehicleSelectionWithAvailability({
     )
   }
 
-  if (isLoading) {
+  if (vehiclesLoading || isLoading) {
     return (
-      <div className="h-full flex flex-col p-4">
+      <div className="h-full flex flex-col p-2 md:p-4">
         <div className="flex items-center gap-3 mb-4">
           <RefreshCw className="w-5 h-5 text-emerald-600 animate-spin" />
-          <h3 className="text-lg font-semibold text-emerald-900">Checking Availability...</h3>
+          <h3 className="text-lg font-semibold text-emerald-900">
+            {vehiclesLoading ? "Loading vehicles..." : "Checking Availability..."}
+          </h3>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 flex-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 flex-1">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <Card key={i} className="backdrop-blur-sm bg-white/80 border-emerald-200/50">
-              <CardContent className="p-4">
-                <Skeleton className="w-full h-24 rounded-lg mb-3" />
+              <CardContent className="p-3 md:p-4">
+                <Skeleton className="w-full h-20 md:h-24 rounded-lg mb-3" />
                 <Skeleton className="h-4 w-3/4 mb-2" />
                 <Skeleton className="h-3 w-1/2 mb-3" />
                 <Skeleton className="h-8 w-full rounded-lg" />
@@ -199,10 +221,13 @@ export default function VehicleSelectionWithAvailability({
         <Card className="backdrop-blur-sm bg-red-50/80 border-red-200/50 w-full max-w-md">
           <CardContent className="p-6 text-center">
             <XCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-red-900 mb-2">Error Checking Availability</h3>
+            <h3 className="text-lg font-semibold text-red-900 mb-2">Error Loading Data</h3>
             <p className="text-red-700 mb-4">{error}</p>
             <Button
-              onClick={checkAvailability}
+              onClick={() => {
+                setError(null)
+                checkAvailability()
+              }}
               variant="outline"
               className="border-red-300 text-red-600 hover:bg-red-50 bg-transparent"
             >
@@ -215,17 +240,31 @@ export default function VehicleSelectionWithAvailability({
     )
   }
 
+  if (vehicles.length === 0) {
+    return (
+      <div className="h-full flex items-center justify-center p-4">
+        <Card className="backdrop-blur-sm bg-yellow-50/80 border-yellow-200/50 w-full max-w-md">
+          <CardContent className="p-6 text-center">
+            <XCircle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-yellow-900 mb-2">No Vehicles Available</h3>
+            <p className="text-yellow-700">No vehicles found for {serviceType} service.</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   const availableVehicles = availability?.availability.filter((v: any) => v.isAvailable).length || 0
   const totalVehicles = availability?.availability.length || 0
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header with availability summary */}
-      <div className="flex-shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 px-4 pt-4 gap-2">
+      <div className="flex-shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 md:mb-4 px-2 md:px-4 pt-2 md:pt-4 gap-2">
         <div>
           <h3 className="text-lg font-semibold text-emerald-900">Select Your Vehicle</h3>
           <p className="text-emerald-700 text-sm">
-            {availability?.searchDates.startDate} to {availability?.searchDates.endDate}
+            {availability?.searchDates?.startDate || startDate} to {availability?.searchDates?.endDate || endDate}
           </p>
         </div>
         <div className="text-left sm:text-right">
@@ -238,7 +277,7 @@ export default function VehicleSelectionWithAvailability({
 
       {/* Auto-navigation message */}
       {autoNavigating && (
-        <div className="flex-shrink-0 mx-4 mb-4">
+        <div className="flex-shrink-0 mx-2 md:mx-4 mb-3 md:mb-4">
           <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200 text-center">
             <div className="flex items-center justify-center gap-2">
               <div className="w-4 h-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
@@ -249,23 +288,24 @@ export default function VehicleSelectionWithAvailability({
       )}
 
       {/* Vehicle Grid - Scrollable */}
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      <div className="flex-1 overflow-y-auto px-2 md:px-4 pb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-6">
           {vehicles.map((vehicle) => {
             const vehicleAvailability = getVehicleAvailability(vehicle.id)
             const isAvailable = vehicleAvailability?.isAvailable !== false
             const isSelected = selectedVehicle === vehicle.id
-            
+            const pricing = vehiclePrices[vehicle.id]
+            const showBreakdown = priceBreakdowns[vehicle.id]
+
             return (
               <Card
                 key={vehicle.id}
-                className={`relative backdrop-blur-sm bg-white/80 rounded-lg border-2 transition-all duration-300 cursor-pointer hover:shadow-lg ${
-                  !isAvailable
+                className={`relative backdrop-blur-sm bg-white/80 rounded-lg border-2 transition-all duration-300 cursor-pointer hover:shadow-lg ${!isAvailable
                     ? "border-red-200 opacity-75 cursor-not-allowed"
                     : isSelected
                       ? "border-emerald-500 shadow-lg shadow-emerald-200/50 transform scale-[1.02]"
                       : "border-emerald-200/50 hover:border-emerald-300 hover:transform hover:scale-[1.02]"
-                }`}
+                  }`}
                 onClick={() => isAvailable && handleVehicleSelect(vehicle.id)}
               >
                 {/* Status indicators */}
@@ -306,22 +346,21 @@ export default function VehicleSelectionWithAvailability({
                   </div>
                 )}
 
-                <CardContent className="p-4">
+                <CardContent className="p-3 md:p-4">
                   {/* Vehicle image */}
-                  <div className="relative h-32 sm:h-24 lg:h-32 mb-4 rounded-lg overflow-hidden bg-gradient-to-br from-emerald-50 to-green-50">
+                  <div className="relative h-24 md:h-32 mb-3 md:mb-4 rounded-lg overflow-hidden bg-gradient-to-br from-emerald-50 to-green-50">
                     <Image
                       src={vehicle.image || "/placeholder.svg"}
                       alt={vehicle.name}
                       fill
-                      className={`object-cover transition-transform duration-300 ${
-                        isAvailable && !autoNavigating ? "hover:scale-110" : "grayscale"
-                      }`}
+                      className={`object-cover transition-transform duration-300 ${isAvailable && !autoNavigating ? "hover:scale-110" : "grayscale"
+                        }`}
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
                   </div>
 
                   {/* Vehicle details */}
-                  <h4 className={`font-bold mb-2 text-base ${isAvailable ? "text-emerald-900" : "text-gray-600"}`}>
+                  <h4 className={`font-bold mb-2 text-sm md:text-base ${isAvailable ? "text-emerald-900" : "text-gray-600"}`}>
                     {vehicle.name}
                   </h4>
 
@@ -332,9 +371,25 @@ export default function VehicleSelectionWithAvailability({
                     </span>
                   </div>
 
+                  {/* Features */}
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {vehicle.features.slice(0, 2).map((feature: string, index: number) => (
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className={`text-xs px-2 py-1 ${isAvailable
+                            ? "border-emerald-300 text-emerald-700"
+                            : "border-gray-300 text-gray-500"
+                          }`}
+                      >
+                        {feature}
+                      </Badge>
+                    ))}
+                  </div>
+
                   {/* Availability status */}
                   {availability && (
-                    <div className="mb-4">
+                    <div className="mb-3">
                       {isAvailable ? (
                         <div className="flex items-center gap-2 p-2 bg-green-50 rounded border border-green-200">
                           <CheckCircle className="w-4 h-4 text-green-600" />
@@ -354,23 +409,79 @@ export default function VehicleSelectionWithAvailability({
                   )}
 
                   {/* Pricing */}
-                  <div className="mb-4 p-3 bg-emerald-50 rounded-lg text-center">
-                    <div className="text-xl font-bold text-emerald-900">
-                      ₹{calculateVehiclePrice(vehicle.id).toLocaleString()}
+                  {pricing ? (
+                    <div className="mb-4 p-3 bg-emerald-50 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="text-center flex-1">
+                          <div className="text-lg md:text-xl font-bold text-emerald-900">
+                            ₹{Math.round(pricing.total).toLocaleString()}
+                          </div>
+                          <div className="text-xs md:text-sm text-emerald-600">Total estimated</div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            togglePriceBreakdown(vehicle.id)
+                          }}
+                          className="text-emerald-600 hover:bg-emerald-100 h-8 w-8 p-0 rounded-full"
+                        >
+                          <Info className="w-4 h-4" />
+                        </Button>
+                      </div>
+
+                      {/* Price Breakdown */}
+                      {showBreakdown && (
+                        <div className="mt-3 p-3 bg-white/80 rounded-lg border border-emerald-200">
+                          <div className="text-sm space-y-1">
+                            <div className="flex justify-between">
+                              <span>Base Amount:</span>
+                              <span>₹{Math.round(pricing.subtotal).toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>GST (12%):</span>
+                              <span>₹{Math.round(pricing.gst).toLocaleString()}</span>
+                            </div>
+                            {pricing.driverDA && (
+                              <div className="flex justify-between">
+                                <span>Driver DA:</span>
+                                <span>₹{Math.round(pricing.driverDA).toLocaleString()}</span>
+                              </div>
+                            )}
+                            <div className="border-t border-emerald-300 pt-1 mt-1">
+                              <div className="flex justify-between font-bold">
+                                <span>Total:</span>
+                                <span>₹{Math.round(pricing.total).toLocaleString()}</span>
+                              </div>
+                            </div>
+                          </div>
+                          {pricing.isOutstation && (
+                            <div className="text-xs text-emerald-600 mt-2">
+                              * Outstation rates (300km/day minimum)
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <div className="text-sm text-emerald-600">Total estimated</div>
-                  </div>
+                  ) : (
+                    <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                      <div className="text-center">
+                        <div className="text-gray-500 text-sm">Calculating price...</div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Select button */}
                   <Button
                     disabled={!isAvailable}
-                    className={`w-full rounded-lg transition-all h-10 ${
-                      !isAvailable
+                    className={`w-full rounded-lg transition-all h-9 md:h-10 text-sm ${!isAvailable
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                         : isSelected
                           ? "bg-emerald-600 hover:bg-emerald-700 text-white"
                           : "bg-emerald-100 hover:bg-emerald-200 text-emerald-700"
-                    }`}
+                      }`}
                   >
                     {!isAvailable ? "Not Available" : isSelected ? "Selected ✓" : "Select Vehicle"}
                   </Button>
@@ -383,12 +494,15 @@ export default function VehicleSelectionWithAvailability({
         {/* Refresh button */}
         <div className="text-center pb-4">
           <Button
-            onClick={checkAvailability}
+            onClick={() => {
+              checkAvailability()
+              calculateAllPrices()
+            }}
             variant="outline"
             className="border-emerald-300 text-emerald-600 hover:bg-emerald-50 bg-transparent"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh Availability
+            Refresh Availability & Prices
           </Button>
         </div>
       </div>

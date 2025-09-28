@@ -16,7 +16,7 @@ export default function BookingFormStep2({ onContinue, onBack, serviceType, book
   }
 
   return (
-    <div className="h-[calc(100vh-200px)] overflow-hidden flex flex-col">
+    <div className="h-full flex flex-col overflow-hidden">
       <div className="flex-1 min-h-0">
         <VehicleSelectionWithAvailability
           startDate={bookingData?.startDate || ""}
@@ -25,11 +25,12 @@ export default function BookingFormStep2({ onContinue, onBack, serviceType, book
           endTime={bookingData?.endTime || ""}
           onVehicleSelect={handleVehicleSelect}
           serviceType={serviceType}
+          bookingData={bookingData}
         />
       </div>
 
       {/* Back Button */}
-      <div className="pt-3 mt-auto">
+      <div className="flex-shrink-0 pt-3 mt-auto">
         <Button
           onClick={onBack}
           variant="outline"
