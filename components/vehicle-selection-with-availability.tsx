@@ -301,10 +301,10 @@ export default function VehicleSelectionWithAvailability({
               <Card
                 key={vehicle.id}
                 className={`relative backdrop-blur-sm bg-white/80 rounded-lg border-2 transition-all duration-300 cursor-pointer hover:shadow-lg ${!isAvailable
-                    ? "border-red-200 opacity-75 cursor-not-allowed"
-                    : isSelected
-                      ? "border-emerald-500 shadow-lg shadow-emerald-200/50 transform scale-[1.02]"
-                      : "border-emerald-200/50 hover:border-emerald-300 hover:transform hover:scale-[1.02]"
+                  ? "border-red-200 opacity-75 cursor-not-allowed"
+                  : isSelected
+                    ? "border-emerald-500 shadow-lg shadow-emerald-200/50 transform scale-[1.02]"
+                    : "border-emerald-200/50 hover:border-emerald-300 hover:transform hover:scale-[1.02]"
                   }`}
                 onClick={() => isAvailable && handleVehicleSelect(vehicle.id)}
               >
@@ -378,8 +378,8 @@ export default function VehicleSelectionWithAvailability({
                         key={index}
                         variant="outline"
                         className={`text-xs px-2 py-1 ${isAvailable
-                            ? "border-emerald-300 text-emerald-700"
-                            : "border-gray-300 text-gray-500"
+                          ? "border-emerald-300 text-emerald-700"
+                          : "border-gray-300 text-gray-500"
                           }`}
                       >
                         {feature}
@@ -477,10 +477,10 @@ export default function VehicleSelectionWithAvailability({
                   <Button
                     disabled={!isAvailable}
                     className={`w-full rounded-lg transition-all h-9 md:h-10 text-sm ${!isAvailable
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : isSelected
-                          ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                          : "bg-emerald-100 hover:bg-emerald-200 text-emerald-700"
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : isSelected
+                        ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                        : "bg-emerald-100 hover:bg-emerald-200 text-emerald-700"
                       }`}
                   >
                     {!isAvailable ? "Not Available" : isSelected ? "Selected ✓" : "Select Vehicle"}

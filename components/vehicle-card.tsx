@@ -35,18 +35,17 @@ export default function VehicleCard({
   autoNavigating = false,
 }: VehicleCardProps) {
   const isAvailable = availability?.isAvailable !== false
-  const availableCount = availability?.availableCount || 0
-  const totalCount = availability?.totalCount || 0
+  const availableCount = availability?.availableCount || 2
+  const totalCount = availability?.totalCount || 2
 
   return (
     <div
-      className={`relative backdrop-blur-sm bg-white/80 rounded-2xl border-2 transition-all duration-300 cursor-pointer hover:shadow-xl ${
-        !isAvailable
-          ? "border-red-200 opacity-75 cursor-not-allowed"
-          : isSelected
-            ? "border-emerald-500 shadow-lg shadow-emerald-200/50 scale-105"
-            : "border-emerald-200/50 hover:border-emerald-300 hover:scale-105"
-      }`}
+      className={`relative backdrop-blur-sm bg-white/80 rounded-2xl border-2 transition-all duration-300 cursor-pointer hover:shadow-xl ${!isAvailable
+        ? "border-red-200 opacity-75 cursor-not-allowed"
+        : isSelected
+          ? "border-emerald-500 shadow-lg shadow-emerald-200/50 scale-105"
+          : "border-emerald-200/50 hover:border-emerald-300 hover:scale-105"
+        }`}
       onClick={() => isAvailable && onSelect(vehicle.id)}
     >
       {/* Availability Status Badge */}
@@ -92,9 +91,8 @@ export default function VehicleCard({
             src={vehicle.image || "/placeholder.svg"}
             alt={vehicle.name}
             fill
-            className={`object-cover transition-transform duration-300 ${
-              isAvailable && !autoNavigating ? "hover:scale-110" : "grayscale"
-            }`}
+            className={`object-contain transition-transform duration-300 ${isAvailable && !autoNavigating ? "hover:scale-110" : "grayscale"
+              }`}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         </div>
@@ -146,9 +144,8 @@ export default function VehicleCard({
               <Badge
                 key={index}
                 variant="outline"
-                className={`text-xs ${
-                  isAvailable ? "border-emerald-300 text-emerald-700" : "border-gray-300 text-gray-500"
-                }`}
+                className={`text-xs ${isAvailable ? "border-emerald-300 text-emerald-700" : "border-gray-300 text-gray-500"
+                  }`}
               >
                 {feature}
               </Badge>
@@ -156,9 +153,8 @@ export default function VehicleCard({
             {vehicle.features.length > 3 && (
               <Badge
                 variant="outline"
-                className={`text-xs ${
-                  isAvailable ? "border-emerald-300 text-emerald-700" : "border-gray-300 text-gray-500"
-                }`}
+                className={`text-xs ${isAvailable ? "border-emerald-300 text-emerald-700" : "border-gray-300 text-gray-500"
+                  }`}
               >
                 +{vehicle.features.length - 3} more
               </Badge>
@@ -168,13 +164,12 @@ export default function VehicleCard({
 
         <Button
           disabled={!isAvailable}
-          className={`w-full rounded-xl transition-all ${
-            !isAvailable
-              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : isSelected
-                ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                : "bg-emerald-100 hover:bg-emerald-200 text-emerald-700"
-          }`}
+          className={`w-full rounded-xl transition-all ${!isAvailable
+            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+            : isSelected
+              ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+              : "bg-emerald-100 hover:bg-emerald-200 text-emerald-700"
+            }`}
         >
           {!isAvailable ? "Not Available" : isSelected ? "Selected ✓" : "Select Vehicle"}
         </Button>
