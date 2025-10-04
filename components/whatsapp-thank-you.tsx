@@ -139,10 +139,12 @@ Please confirm final pricing. Thank you!`
                   {bookingData.serviceArea?.outsideMumbai && "Outside Mumbai"}
                 </span>
               </div>
-              <div>
-                <span className="font-medium text-emerald-800">Distance:</span>
-                <span className="ml-2 text-emerald-700">{bookingData.estimatedKms || 150} km</span>
-              </div>
+              {bookingData.serviceType === "chauffeur" && bookingData.dropLocation && (
+                <div>
+                  <span className="font-medium text-emerald-800">Distance:</span>
+                  <span className="ml-2 text-emerald-700">{bookingData.estimatedKms || 150} km</span>
+                </div>
+              )}
               <div>
                 <span className="font-medium text-emerald-800">Customer:</span>
                 <span className="ml-2 text-emerald-700">{customerData.name}</span>

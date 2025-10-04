@@ -163,10 +163,11 @@ export default function PaymentGateway({ bookingData, onBack, onPaymentSuccess }
                     {bookingData.dropLocation && ` → ${bookingData.dropLocation}`}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-emerald-700">Distance:</span>
-                  <span className="font-medium text-emerald-900">{bookingData.estimatedKms || 150} km</span>
-                </div>
+                {bookingData.serviceType === "chauffeur" &&
+                  (<div className="flex justify-between">
+                    <span className="text-emerald-700">Distance:</span>
+                    <span className="font-medium text-emerald-900">{bookingData.estimatedKms || 150} km</span>
+                  </div>)}
                 <div className="flex justify-between">
                   <span className="text-emerald-700">Duration:</span>
                   <span className="font-medium text-emerald-900">

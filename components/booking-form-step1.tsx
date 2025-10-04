@@ -197,10 +197,10 @@ export default function BookingFormStep1({
                 className="border-blue-300"
               />
               <Label htmlFor="withinMumbai" className="text-blue-800 font-medium text-sm">
-                Within Mumbai
+                Within Mumbai & Navi Mumbai
               </Label>
             </div>
-            <div className="flex items-center space-x-2">
+            {/* <div className="flex items-center space-x-2">
               <Checkbox
                 id="naviMumbai"
                 checked={formData.serviceArea.naviMumbai}
@@ -210,7 +210,7 @@ export default function BookingFormStep1({
               <Label htmlFor="naviMumbai" className="text-blue-800 font-medium text-sm">
                 Navi Mumbai
               </Label>
-            </div>
+            </div> */}
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="outsideMumbai"
@@ -263,7 +263,7 @@ export default function BookingFormStep1({
             )}
 
             {/* Estimated KMs */}
-            <div className="space-y-1">
+            {/* <div className="space-y-1">
               <Label htmlFor="estimatedKms" className="text-emerald-800 font-medium text-sm">
                 Estimated Distance (KMs)
               </Label>
@@ -276,7 +276,7 @@ export default function BookingFormStep1({
                 className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
                 min="0"
               />
-            </div>
+            </div> */}
 
             {/* Stopovers - Only for Chauffeur Service */}
             {serviceType === "chauffeur" && (

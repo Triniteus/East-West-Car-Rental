@@ -68,8 +68,8 @@ export default function DateTimePicker({ startDate, endDate, startTime, endTime,
       // Set defaults
       const today = new Date().toISOString().split("T")[0]
       const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split("T")[0]
-      setSelectedStartDate(today)
-      setSelectedEndDate(tomorrow)
+      // setSelectedStartDate(today)
+      // setSelectedEndDate(tomorrow)
       setSelectedStartTime("09:00")
       setSelectedEndTime("18:00")
     }

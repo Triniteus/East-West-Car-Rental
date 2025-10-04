@@ -121,10 +121,6 @@ export default function WhatsAppQuote({ bookingData, onBack, onPayNow, onWhatsAp
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="font-medium text-emerald-800">Distance:</span>
-                <span className="text-emerald-700">{bookingData.estimatedKms || 150} km</span>
-              </div>
-              <div className="flex justify-between">
                 <span className="font-medium text-emerald-800">Start:</span>
                 <span className="text-emerald-700">
                   {bookingData.startDate} {bookingData.startTime}
