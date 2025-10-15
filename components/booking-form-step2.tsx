@@ -1,4 +1,5 @@
 "use client"
+import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import VehicleSelectionWithAvailability from "@/components/vehicle-selection-with-availability"
@@ -11,6 +12,11 @@ interface BookingFormStep2Props {
 }
 
 export default function BookingFormStep2({ onContinue, onBack, serviceType, bookingData }: BookingFormStep2Props) {
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
+
   const handleVehicleSelect = (vehicle: any) => {
     onContinue({ selectedVehicle: vehicle })
   }

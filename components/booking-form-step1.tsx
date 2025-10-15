@@ -52,6 +52,11 @@ export default function BookingFormStep1({
 
   const [showPriceBreakdown, setShowPriceBreakdown] = useState(false)
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
+
+
   const addStopover = () => {
     setFormData((prev) => ({
       ...prev,
