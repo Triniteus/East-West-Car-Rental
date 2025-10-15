@@ -92,8 +92,9 @@ export default function ContactPage() {
       <nav className="backdrop-blur-md bg-white/80 border-b border-emerald-200/50 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <Link href="/" className="text-2xl font-bold text-emerald-900">
-              East West
+            <Link href="/" className="flex items-center gap-2">
+              <span className="text-2xl font-bold text-emerald-900">East West</span>
+              <span className="text-xs text-emerald-600 font-medium">powered by Self Drive India</span>
             </Link>
             <div className="flex items-center space-x-4">
               <Link href="/about" className="text-emerald-600 hover:text-emerald-800">

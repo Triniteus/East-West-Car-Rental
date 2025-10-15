@@ -27,8 +27,9 @@ export default function HomePage() {
       <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/90 border-b border-white/20 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-3 sm:py-4">
-            <Link href="/" className="text-xl sm:text-2xl font-bold text-emerald-900">
-              East West
+            <Link href="/" className="flex items-center gap-2">
+              <span className="text-xl sm:text-2xl font-bold text-emerald-900">East West</span>
+              <span className="text-[10px] sm:text-xs text-emerald-600 font-medium">powered by Self Drive India</span>
             </Link>
             <div className="flex space-x-4 sm:space-x-6">
               <Link
@@ -63,9 +64,12 @@ export default function HomePage() {
         {/* Content */}
         <div className="relative z-20 text-center text-white px-4 max-w-4xl mx-auto">
           <div className="backdrop-blur-md bg-white/10 rounded-3xl p-6 sm:p-8 border border-white/20 shadow-2xl">
-            <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-emerald-300 to-green-200 bg-clip-text text-transparent">
-              East West
-            </h1>
+            <div className="flex flex-col items-center mb-4 sm:mb-6">
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold bg-gradient-to-r from-emerald-300 to-green-200 bg-clip-text text-transparent">
+                East West
+              </h1>
+              <p className="text-xs sm:text-sm text-emerald-200 font-medium mt-2">powered by Self Drive India</p>
+            </div>
             <p className="text-lg sm:text-xl md:text-2xl mb-3 sm:mb-4 text-emerald-100">Premium Car Rental Portal</p>
             <p className="text-base sm:text-lg mb-8 sm:mb-12 text-green-200 font-medium">
               Driven by Trust. Powered by East West.
@@ -92,7 +96,7 @@ export default function HomePage() {
                 <div className="group cursor-pointer">
                   <div className="backdrop-blur-lg bg-gradient-to-br from-green-500/20 to-teal-600/20 rounded-2xl p-6 sm:p-8 border border-green-400/30 hover:border-green-300/50 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
                     <Users className="w-10 h-10 sm:w-12 sm:h-12 text-green-300 mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform" />
-                    <h3 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 text-white">Chauffeur Service</h3>
+                    <h3 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 text-white">Hired Driver Service</h3>
                     <p className="text-green-200 mb-3 sm:mb-4 text-sm sm:text-base">
                       Professional drivers at your service
                     </p>

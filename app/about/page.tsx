@@ -9,8 +9,9 @@ export default function AboutPage() {
       <nav className="backdrop-blur-md bg-white/80 border-b border-emerald-200/50 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <Link href="/" className="text-2xl font-bold text-emerald-900">
-              East West
+            <Link href="/" className="flex items-center gap-2">
+              <span className="text-2xl font-bold text-emerald-900">East West</span>
+              <span className="text-xs text-emerald-600 font-medium">powered by Self Drive India</span>
             </Link>
             <div className="flex items-center space-x-4">
               <Link href="/contact" className="text-emerald-600 hover:text-emerald-800">
@@ -27,7 +28,10 @@ export default function AboutPage() {
       <div className="max-w-6xl mx-auto px-4 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-emerald-900 mb-6">About East West</h1>
+          <div className="flex flex-col items-center mb-6">
+            <h1 className="text-5xl font-bold text-emerald-900">About East West</h1>
+            <p className="text-sm text-emerald-600 font-medium mt-2">powered by Self Drive India</p>
+          </div>
           <p className="text-xl text-emerald-700 max-w-3xl mx-auto">
             Your trusted partner for premium car rental services across India. We combine reliability, comfort, and
             exceptional service to make every journey memorable.

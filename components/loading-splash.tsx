@@ -29,8 +29,11 @@ export default function LoadingSplash() {
         </div>
 
         {/* Logo and Text */}
-        <h1 className="text-5xl font-bold text-white mb-4 animate-pulse">East West</h1>
-        <p className="text-emerald-300 text-lg font-medium">Driven by Trust. Powered by East West.</p>
+        <div className="flex flex-col items-center">
+          <h1 className="text-5xl font-bold text-white animate-pulse">East West</h1>
+          <p className="text-sm text-emerald-200 font-medium mt-2">powered by Self Drive India</p>
+        </div>
+        <p className="text-emerald-300 text-lg font-medium mt-4">Driven by Trust. Powered by East West.</p>
 
         {/* Loading Dots */}
         <div className="flex justify-center space-x-2 mt-8">

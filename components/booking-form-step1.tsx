@@ -12,6 +12,13 @@ import { calculateSelfDrivePrice, calculateChauffeurPrice, calculateDays, calcul
 import type { ServiceArea } from "@/lib/booking-utils"
 import { useToast } from "@/components/ui/use-toast"
 import { Toaster } from "@/components/ui/toaster"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface BookingFormStep1Props {
   onContinue: (data: any) => void
@@ -51,6 +58,8 @@ export default function BookingFormStep1({
   })
 
   const [showPriceBreakdown, setShowPriceBreakdown] = useState(false)
+  const [pickupOption, setPickupOption] = useState<"hub" | "custom">("custom")
+  const [dropOption, setDropOption] = useState<"hub" | "custom">("custom")
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -409,38 +418,117 @@ export default function BookingFormStep1({
             ) : (
               // Chauffeur Service Location Fields
               <>
-                <div className="space-y-1">
+                <div className="space-y-2">
                   <Label htmlFor="pickup" className="text-emerald-800 font-medium flex items-center gap-2 text-sm">
                     <MapPin className="w-3 h-3" />
                     Pickup Location *
                   </Label>
-                  <Input
-                    id="pickup"
-                    value={formData.pickupLocation}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, pickupLocation: e.target.value }))}
-                    placeholder="Enter pickup location"
-                    className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
-                    required
+
+                  {/* Pickup Option Selector */}
+                  <Select
+                    value={pickupOption}
+                    onValueChange={(value: "hub" | "custom") => {
+                      setPickupOption(value)
+                      if (value === "hub") {
+                        setFormData((prev) => ({
+                          ...prev,
+                          pickupLocation: "East West Car Rental Hub - Chembur, Mumbai"
+                        }))
+                      } else {
+                        setFormData((prev) => ({ ...prev, pickupLocation: "" }))
+                      }
+                    }}
                     disabled={formData.roundTrip}
-                  />
+                  >
+                    <SelectTrigger className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9">
+                      <SelectValue placeholder="Select pickup option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="hub">Pickup at Hub</SelectItem>
+                      <SelectItem value="custom">Custom Location</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {/* Show Hub Address or Custom Input */}
+                  {pickupOption === "hub" ? (
+                    <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                      <p className="text-sm text-emerald-800 font-medium">
+                        📍 East West Car Rental Hub
+                      </p>
+                      <p className="text-xs text-emerald-600 mt-1">
+                        Chembur, Mumbai, Maharashtra
+                      </p>
+                    </div>
+                  ) : (
+                    <Input
+                      id="pickup"
+                      value={formData.pickupLocation}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, pickupLocation: e.target.value }))}
+                      placeholder="Enter custom pickup location"
+                      className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
+                      required
+                      disabled={formData.roundTrip}
+                    />
+                  )}
                 </div>
 
-                <div className="space-y-1">
+                <div className="space-y-2">
                   <Label htmlFor="drop" className="text-emerald-800 font-medium flex items-center gap-2 text-sm">
                     <MapPin className="w-3 h-3" />
                     Drop Location *
                   </Label>
-                  <Input
-                    id="drop"
-                    value={formData.dropLocation}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, dropLocation: e.target.value }))}
-                    placeholder="Enter drop location"
-                    className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
-                    required
-                    disabled={formData.roundTrip}
-                  />
-                  {formData.roundTrip && (
-                    <p className="text-xs text-emerald-600">Round trip: Drop location same as pickup</p>
+
+                  {/* Drop Option Selector */}
+                  {!formData.roundTrip && (
+                    <Select
+                      value={dropOption}
+                      onValueChange={(value: "hub" | "custom") => {
+                        setDropOption(value)
+                        if (value === "hub") {
+                          setFormData((prev) => ({
+                            ...prev,
+                            dropLocation: "East West Car Rental Hub - Chembur, Mumbai"
+                          }))
+                        } else {
+                          setFormData((prev) => ({ ...prev, dropLocation: "" }))
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9">
+                        <SelectValue placeholder="Select drop option" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="hub">Drop at Hub</SelectItem>
+                        <SelectItem value="custom">Custom Location</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+
+                  {/* Show Hub Address or Custom Input or Round Trip Message */}
+                  {formData.roundTrip ? (
+                    <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                      <p className="text-xs text-emerald-600">
+                        🔄 Round trip: Drop location same as pickup
+                      </p>
+                    </div>
+                  ) : dropOption === "hub" ? (
+                    <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                      <p className="text-sm text-emerald-800 font-medium">
+                        📍 East West Car Rental Hub
+                      </p>
+                      <p className="text-xs text-emerald-600 mt-1">
+                        Chembur, Mumbai, Maharashtra
+                      </p>
+                    </div>
+                  ) : (
+                    <Input
+                      id="drop"
+                      value={formData.dropLocation}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, dropLocation: e.target.value }))}
+                      placeholder="Enter custom drop location"
+                      className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
+                      required
+                    />
                   )}
                 </div>
               </>
