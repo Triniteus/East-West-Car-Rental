@@ -7,8 +7,11 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Plus, X, MapPin, RotateCcw, Info } from "lucide-react"
 import DateTimePicker from "@/components/date-time-picker"
+import { DateRangePicker } from "@/components/date-range-picker"
 import { calculateSelfDrivePrice, calculateChauffeurPrice, calculateDays, calculateHours } from "@/lib/booking-utils"
 import type { ServiceArea } from "@/lib/booking-utils"
+import { useToast } from "@/components/ui/use-toast"
+import { Toaster } from "@/components/ui/toaster"
 
 interface BookingFormStep1Props {
   onContinue: (data: any) => void
@@ -21,7 +24,14 @@ export default function BookingFormStep1({
   initialData,
   serviceType = "self-drive",
 }: BookingFormStep1Props) {
+  const { toast } = useToast()
   const [formData, setFormData] = useState({
+    // Self-drive address fields
+    addressLine1: initialData.addressLine1 || "",
+    addressLine2: initialData.addressLine2 || "",
+    state: initialData.state || "",
+    city: initialData.city || "",
+    areaCode: initialData.areaCode || "",
     pickupLocation: initialData.pickupLocation || "",
     dropLocation: initialData.dropLocation || "",
     stopovers: initialData.stopovers || [""],
@@ -87,11 +97,46 @@ export default function BookingFormStep1({
     setFormData((prev) => ({ ...prev, ...dateTimeData }))
   }, [])
 
+  // Handle date range change for self-drive
+  const handleDateRangeChange = useCallback((startDate: string, endDate: string) => {
+    const days = calculateDays(startDate, endDate)
+    setFormData((prev) => ({
+      ...prev,
+      startDate,
+      endDate,
+      numberOfDays: days
+    }))
+  }, [])
+
+  // Handle round trip toggle
+  const handleRoundTripChange = (checked: boolean) => {
+    setFormData((prev) => {
+      if (checked && serviceType === "chauffeur") {
+        // For round trip chauffeur: set drop as pickup and clear stopovers
+        return {
+          ...prev,
+          roundTrip: true,
+          dropLocation: prev.pickupLocation,
+          stopovers: [""]
+        }
+      }
+      return {
+        ...prev,
+        roundTrip: checked
+      }
+    })
+  }
+
   const handleReset = () => {
     const today = new Date().toISOString().split("T")[0]
     const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split("T")[0]
 
     setFormData({
+      addressLine1: "",
+      addressLine2: "",
+      state: "",
+      city: "",
+      areaCode: "",
       pickupLocation: "",
       dropLocation: serviceType === "self-drive" ? "" : "",
       stopovers: [""],
@@ -161,19 +206,95 @@ export default function BookingFormStep1({
   ])
 
   const handleContinue = () => {
-    const requiredFields =
-      serviceType === "self-drive"
-        ? formData.pickupLocation && formData.startDate && formData.endDate
-        : formData.pickupLocation && formData.dropLocation && formData.startDate && formData.endDate
+    // Combine address fields for self-drive
+    if (serviceType === "self-drive") {
+      if (!formData.addressLine1.trim()) {
+        toast({
+          title: "Missing Information",
+          description: "Please fill in Address Line 1",
+          variant: "destructive"
+        })
+        return
+      }
+      if (!formData.state.trim()) {
+        toast({
+          title: "Missing Information",
+          description: "Please fill in State",
+          variant: "destructive"
+        })
+        return
+      }
+      if (!formData.city.trim()) {
+        toast({
+          title: "Missing Information",
+          description: "Please fill in City",
+          variant: "destructive"
+        })
+        return
+      }
+      if (!formData.areaCode.trim()) {
+        toast({
+          title: "Missing Information",
+          description: "Please fill in Area Code",
+          variant: "destructive"
+        })
+        return
+      }
 
-    if (requiredFields) {
-      onContinue(formData)
+      // Combine all address fields into pickupLocation
+      const fullAddress = [
+        formData.addressLine1,
+        formData.addressLine2,
+        formData.city,
+        formData.state,
+        formData.areaCode
+      ].filter(Boolean).join(", ")
+
+      formData.pickupLocation = fullAddress
+    } else {
+      // Chauffeur service validation
+      if (!formData.pickupLocation.trim()) {
+        toast({
+          title: "Missing Information",
+          description: "Please fill in Pickup Location",
+          variant: "destructive"
+        })
+        return
+      }
+      if (!formData.dropLocation.trim()) {
+        toast({
+          title: "Missing Information",
+          description: "Please fill in Drop Location",
+          variant: "destructive"
+        })
+        return
+      }
     }
+
+    // Common validations
+    if (!formData.startDate) {
+      toast({
+        title: "Missing Information",
+        description: "Please select a start date",
+        variant: "destructive"
+      })
+      return
+    }
+    if (!formData.endDate) {
+      toast({
+        title: "Missing Information",
+        description: "Please select an end date",
+        variant: "destructive"
+      })
+      return
+    }
+
+    onContinue(formData)
   }
 
   const isFormValid =
     serviceType === "self-drive"
-      ? formData.pickupLocation && formData.startDate && formData.endDate
+      ? formData.addressLine1 && formData.state && formData.city && formData.areaCode && formData.startDate && formData.endDate
       : formData.pickupLocation && formData.dropLocation && formData.startDate && formData.endDate
 
   return (
@@ -186,8 +307,8 @@ export default function BookingFormStep1({
       {/* Main Content - Scrollable */}
       <div className="flex-1 overflow-y-auto space-y-4 pr-2">
         {/* Service Area Selection */}
-        <div className="bg-blue-50/80 rounded-xl p-4 border border-blue-200/50">
-          <Label className="text-blue-900 font-medium text-sm mb-3 block">Service Area *</Label>
+        <div className="bg-emerald-50/80 rounded-xl p-4 border border-emerald-200/50">
+          <Label className="text-emerald-900 font-medium text-sm mb-3">Service Area *</Label>
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -196,7 +317,7 @@ export default function BookingFormStep1({
                 onCheckedChange={(checked) => handleServiceAreaChange('withinMumbai', !!checked)}
                 className="border-blue-300"
               />
-              <Label htmlFor="withinMumbai" className="text-blue-800 font-medium text-sm">
+              <Label htmlFor="withinMumbai" className="text-emerald-800 font-medium text-sm">
                 Within Mumbai & Navi Mumbai
               </Label>
             </div>
@@ -218,7 +339,7 @@ export default function BookingFormStep1({
                 onCheckedChange={(checked) => handleServiceAreaChange('outsideMumbai', !!checked)}
                 className="border-blue-300"
               />
-              <Label htmlFor="outsideMumbai" className="text-blue-800 font-medium text-sm">
+              <Label htmlFor="outsideMumbai" className="text-emerald-800 font-medium text-sm">
                 Outside Mumbai (Outstation)
               </Label>
             </div>
@@ -228,38 +349,96 @@ export default function BookingFormStep1({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Left Column - Location Details */}
           <div className="space-y-3">
-            {/* Pickup Location */}
-            <div className="space-y-1">
-              <Label htmlFor="pickup" className="text-emerald-800 font-medium flex items-center gap-2 text-sm">
-                <MapPin className="w-3 h-3" />
-                Pickup Location *
-              </Label>
-              <Input
-                id="pickup"
-                value={formData.pickupLocation}
-                onChange={(e) => setFormData((prev) => ({ ...prev, pickupLocation: e.target.value }))}
-                placeholder="Enter pickup location"
-                className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
-                required
-              />
-            </div>
-
-            {/* Drop Location - Only for Chauffeur Service */}
-            {serviceType === "chauffeur" && (
-              <div className="space-y-1">
-                <Label htmlFor="drop" className="text-emerald-800 font-medium flex items-center gap-2 text-sm">
+            {/* Self-Drive Address Fields */}
+            {serviceType === "self-drive" ? (
+              <div className="space-y-3">
+                <Label className="text-emerald-800 font-medium flex items-center gap-2 text-sm">
                   <MapPin className="w-3 h-3" />
-                  Drop Location *
+                  Pickup Address *
                 </Label>
-                <Input
-                  id="drop"
-                  value={formData.dropLocation}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, dropLocation: e.target.value }))}
-                  placeholder="Enter drop location"
-                  className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
-                  required
-                />
+
+                <div className="space-y-2">
+                  <Input
+                    id="addressLine1"
+                    value={formData.addressLine1}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, addressLine1: e.target.value }))}
+                    placeholder="Address Line 1 *"
+                    className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
+                    required
+                  />
+                  <Input
+                    id="addressLine2"
+                    value={formData.addressLine2}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, addressLine2: e.target.value }))}
+                    placeholder="Address Line 2 (Optional)"
+                    className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
+                  />
+                  <div className="grid grid-cols-2 gap-2">
+                    <Input
+                      id="city"
+                      value={formData.city}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, city: e.target.value }))}
+                      placeholder="City *"
+                      className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
+                      required
+                    />
+                    <Input
+                      id="state"
+                      value={formData.state}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, state: e.target.value }))}
+                      placeholder="State *"
+                      className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
+                      required
+                    />
+                  </div>
+                  <Input
+                    id="areaCode"
+                    value={formData.areaCode}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, areaCode: e.target.value }))}
+                    placeholder="Area Code *"
+                    className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
+                    required
+                  />
+                </div>
               </div>
+            ) : (
+              // Chauffeur Service Location Fields
+              <>
+                <div className="space-y-1">
+                  <Label htmlFor="pickup" className="text-emerald-800 font-medium flex items-center gap-2 text-sm">
+                    <MapPin className="w-3 h-3" />
+                    Pickup Location *
+                  </Label>
+                  <Input
+                    id="pickup"
+                    value={formData.pickupLocation}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, pickupLocation: e.target.value }))}
+                    placeholder="Enter pickup location"
+                    className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
+                    required
+                    disabled={formData.roundTrip}
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label htmlFor="drop" className="text-emerald-800 font-medium flex items-center gap-2 text-sm">
+                    <MapPin className="w-3 h-3" />
+                    Drop Location *
+                  </Label>
+                  <Input
+                    id="drop"
+                    value={formData.dropLocation}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, dropLocation: e.target.value }))}
+                    placeholder="Enter drop location"
+                    className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
+                    required
+                    disabled={formData.roundTrip}
+                  />
+                  {formData.roundTrip && (
+                    <p className="text-xs text-emerald-600">Round trip: Drop location same as pickup</p>
+                  )}
+                </div>
+              </>
             )}
 
             {/* Estimated KMs */}
@@ -278,8 +457,8 @@ export default function BookingFormStep1({
               />
             </div> */}
 
-            {/* Stopovers - Only for Chauffeur Service */}
-            {serviceType === "chauffeur" && (
+            {/* Stopovers - Only for Chauffeur Service and not Round Trip */}
+            {serviceType === "chauffeur" && !formData.roundTrip && (
               <div className="space-y-1">
                 <Label className="text-emerald-800 font-medium text-sm">Add Stopover (Optional)</Label>
                 {formData.stopovers.slice(0, 2).map((stopover: string, index: number) => (
@@ -320,15 +499,15 @@ export default function BookingFormStep1({
 
             {/* Round Trip - Only for Chauffeur Service */}
             {serviceType === "chauffeur" && (
-              <div className="flex items-center space-x-2 pt-2">
+              <div className="flex items-center space-x-2 p-3 bg-emerald-50/50 rounded-lg">
                 <Checkbox
-                  id="roundtrip"
+                  id="roundTrip"
                   checked={formData.roundTrip}
-                  onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, roundTrip: !!checked }))}
-                  className="border-emerald-300"
+                  onCheckedChange={handleRoundTripChange}
+                  className="border-emerald-400"
                 />
-                <Label htmlFor="roundtrip" className="text-emerald-800 font-medium text-sm">
-                  Round Trip
+                <Label htmlFor="roundTrip" className="text-emerald-800 font-medium text-sm cursor-pointer">
+                  Round Trip (Return to pickup location)
                 </Label>
               </div>
             )}
@@ -336,14 +515,62 @@ export default function BookingFormStep1({
 
           {/* Right Column - Date & Time Selection */}
           <div>
-            <h3 className="text-sm font-semibold text-emerald-900 mb-3">Select Dates & Times</h3>
-            <DateTimePicker
-              startDate={formData.startDate}
-              endDate={formData.endDate}
-              startTime={formData.startTime}
-              endTime={formData.endTime}
-              onChange={handleDateTimeChange}
-            />
+            {serviceType === "self-drive" ? (
+              // Self-Drive: Date Range Picker (like Skyscanner)
+              <div className="space-y-4">
+                <DateRangePicker
+                  startDate={formData.startDate}
+                  endDate={formData.endDate}
+                  onChange={handleDateRangeChange}
+                />
+
+                {/* Time Selection for Self-Drive */}
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-emerald-800 font-medium text-sm mb-2 block">Pickup Time</Label>
+                    <Input
+                      type="time"
+                      value={formData.startTime}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, startTime: e.target.value }))}
+                      className="rounded-lg border-emerald-300 focus:border-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-emerald-800 font-medium text-sm mb-2 block">Return Time</Label>
+                    <Input
+                      type="time"
+                      value={formData.endTime}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, endTime: e.target.value }))}
+                      className="rounded-lg border-emerald-300 focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Duration Summary for Self-Drive */}
+                {formData.startDate && formData.endDate && (
+                  <div className="p-3 bg-emerald-100 text-emerald-900 rounded-lg border border-emerald-300">
+                    <div className="text-sm font-medium">
+                      {formData.numberOfDays} Day{formData.numberOfDays > 1 ? "s" : ""} Rental
+                    </div>
+                    <div className="text-xs text-emerald-700 mt-1">
+                      {formData.startDate.split('-').reverse().join('-')} at {formData.startTime} → {formData.endDate.split('-').reverse().join('-')} at {formData.endTime}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              // Chauffeur: Full Date Time Picker
+              <div>
+                <h3 className="text-sm font-semibold text-emerald-900 mb-3">Select Dates & Times</h3>
+                <DateTimePicker
+                  startDate={formData.startDate}
+                  endDate={formData.endDate}
+                  startTime={formData.startTime}
+                  endTime={formData.endTime}
+                  onChange={handleDateTimeChange}
+                />
+              </div>
+            )}
           </div>
         </div>
 
@@ -407,12 +634,12 @@ export default function BookingFormStep1({
         </Button>
         <Button
           onClick={handleContinue}
-          disabled={!isFormValid}
           className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg h-9"
         >
           Continue
         </Button>
       </div>
+      <Toaster />
     </div>
   )
 }

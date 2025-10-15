@@ -22,19 +22,19 @@ export default function WhatsAppThankYou({ bookingData, customerData, onBack, on
   const [whatsappOpened, setWhatsappOpened] = useState(false)
   const [autoPopupDone, setAutoPopupDone] = useState(false)
 
-  const generateWhatsAppMessage = () => {
+  const generateWhatsAppMessage = async () => {
     // Calculate pricing using utility functions
-    const calculatePricing = () => {
+    const calculatePricing = async () => {
       try {
         if (bookingData.serviceType === "self-drive") {
-          return calculateSelfDrivePrice(
+          return await calculateSelfDrivePrice(
             bookingData.selectedVehicle?.id,
             bookingData.numberOfDays,
             bookingData.estimatedKms || 150
           )
         } else {
           const hours = calculateHours(bookingData.startTime, bookingData.endTime)
-          return calculateChauffeurPrice(
+          return await calculateChauffeurPrice(
             bookingData.selectedVehicle?.id,
             bookingData.numberOfDays,
             hours,
@@ -43,12 +43,12 @@ export default function WhatsAppThankYou({ bookingData, customerData, onBack, on
           )
         }
       } catch (error) {
-        return { total: 0 }
+        return null
       }
     }
 
-    const pricing = calculatePricing()
-    const total = Math.round(pricing.total || 0)
+    const pricing = await calculatePricing()
+    const total = Math.round((pricing?.total ?? 0))
 
     const serviceAreaText = bookingData.serviceArea?.withinMumbai ? "Within Mumbai" :
       bookingData.serviceArea?.naviMumbai ? "Navi Mumbai" :
@@ -79,8 +79,8 @@ Please confirm final pricing. Thank you!`
     return encodeURIComponent(message)
   }
 
-  const openWhatsApp = () => {
-    const message = generateWhatsAppMessage()
+  const openWhatsApp = async () => {
+    const message = await generateWhatsAppMessage()
     const whatsappUrl = `https://wa.me/919867285333?text=${message}`
     window.open(whatsappUrl, "_blank")
     setWhatsappOpened(true)
@@ -101,6 +101,7 @@ Please confirm final pricing. Thank you!`
 
       return () => clearInterval(timer)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoPopupDone])
 
   return (

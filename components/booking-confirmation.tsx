@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -10,7 +10,8 @@ import Link from "next/link"
 import {
   calculateSelfDrivePrice,
   calculateChauffeurPrice,
-  calculateHours
+  calculateHours,
+  PricingBreakdown
 } from "@/lib/booking-utils"
 
 interface BookingConfirmationProps {
@@ -20,6 +21,18 @@ interface BookingConfirmationProps {
 export default function BookingConfirmation({ paymentData }: BookingConfirmationProps) {
   const [isDownloading, setIsDownloading] = useState(false)
   const [showPriceBreakdown, setShowPriceBreakdown] = useState(false)
+  const [actualPricing, setActualPricing] = useState<PricingBreakdown>({
+    total: paymentData.amount,
+    subtotal: paymentData.amount * 0.89,
+    gst: paymentData.amount * 0.11,
+    driverDA: 0,
+    isOutstation: false,
+    baseRate: 0,
+    extraKmRate: 0,
+    extraHrRate: 0,
+    totalKms: 0,
+    totalHours: 0
+  })
 
   const handleDownloadReceipt = async () => {
     setIsDownloading(true)
@@ -52,37 +65,41 @@ Book your ride at eastwestrentals.com`
     }
   }
 
-  const calculateActualPricing = () => {
-    try {
-      const bookingData = paymentData.bookingData
-      if (bookingData.serviceType === "self-drive") {
-        return calculateSelfDrivePrice(
-          bookingData.selectedVehicle?.id,
-          bookingData.numberOfDays,
-          bookingData.estimatedKms || 150
-        )
-      } else {
-        const hours = calculateHours(bookingData.startTime, bookingData.endTime)
-        return calculateChauffeurPrice(
-          bookingData.selectedVehicle?.id,
-          bookingData.numberOfDays,
-          hours,
-          bookingData.estimatedKms || 150,
-          bookingData.serviceArea
-        )
-      }
-    } catch (error) {
-      return {
-        total: paymentData.amount,
-        subtotal: paymentData.amount * 0.89,
-        gst: paymentData.amount * 0.11,
-        driverDA: 0,
-        isOutstation: false
+  useEffect(() => {
+    const loadActualPricing = async () => {
+      try {
+        const bookingData = paymentData.bookingData
+        let pricing: PricingBreakdown | null = null
+
+        if (bookingData.serviceType === "self-drive") {
+          pricing = await calculateSelfDrivePrice(
+            bookingData.selectedVehicle?.id,
+            bookingData.numberOfDays,
+            bookingData.estimatedKms || 150
+          )
+        } else {
+          const hours = calculateHours(bookingData.startTime, bookingData.endTime)
+          pricing = await calculateChauffeurPrice(
+            bookingData.selectedVehicle?.id,
+            bookingData.numberOfDays,
+            hours,
+            bookingData.estimatedKms || 150,
+            bookingData.serviceArea
+          )
+        }
+
+        if (pricing) {
+          setActualPricing(pricing)
+        }
+      } catch (error) {
+        console.error("Error calculating pricing:", error)
+        // Keep default fallback pricing
       }
     }
-  }
 
-  const actualPricing = calculateActualPricing()
+    loadActualPricing()
+  }, [paymentData])
+
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-IN", {

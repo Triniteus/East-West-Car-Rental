@@ -144,6 +144,7 @@ export default function DateTimePicker({ startDate, endDate, startTime, endTime,
                 title="Return"
                 value={selectedEndDate}
                 onChange={setSelectedEndDate}
+                minDate={selectedStartDate ? new Date(selectedStartDate + 'T00:00:00') : new Date()}
               />
             </div>
 

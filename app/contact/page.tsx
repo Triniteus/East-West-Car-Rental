@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Toaster } from "@/components/ui/toaster"
 import { ArrowLeft, Phone, Mail, MapPin, Clock, MessageCircle } from "lucide-react"
 import Link from "next/link"
-import { toast } from "sonner"
+import { useToast } from "@/components/ui/use-toast"
 
 export default function ContactPage() {
+  const { toast } = useToast()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -25,12 +27,20 @@ export default function ContactPage() {
     e.preventDefault()
 
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      toast.error("Please enter a valid email address")
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address",
+        variant: "destructive"
+      })
       return
     }
 
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      toast.error("Please fill in all required fields")
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      })
       return
     }
 
@@ -52,14 +62,25 @@ export default function ContactPage() {
       const data = await response.json()
 
       if (data.success) {
-        toast.success("Thank you for your message! We will get back to you soon.")
+        toast({
+          title: "Message Sent!",
+          description: "Thank you for your message! We will get back to you soon."
+        })
         setFormData({ name: "", email: "", message: "" })
       } else {
-        toast.error("Failed to send message. Please try again.")
+        toast({
+          title: "Error",
+          description: "Failed to send message. Please try again.",
+          variant: "destructive"
+        })
       }
     } catch (error) {
       console.error('Contact form error:', error)
-      toast.error("Something went wrong. Please try again.")
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -272,6 +293,7 @@ export default function ContactPage() {
           </div>
         </div>
       </div>
+      <Toaster />
     </div>
   )
 }

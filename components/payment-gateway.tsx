@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,7 +11,8 @@ import { Badge } from "@/components/ui/badge"
 import {
   calculateSelfDrivePrice,
   calculateChauffeurPrice,
-  calculateHours
+  calculateHours,
+  PricingBreakdown
 } from "@/lib/booking-utils"
 
 interface PaymentGatewayProps {
@@ -24,6 +25,18 @@ export default function PaymentGateway({ bookingData, onBack, onPaymentSuccess }
   const [paymentMethod, setPaymentMethod] = useState<"advance" | "full">("advance")
   const [isProcessing, setIsProcessing] = useState(false)
   const [showPriceBreakdown, setShowPriceBreakdown] = useState(false)
+  const [pricing, setPricing] = useState<PricingBreakdown>({
+    baseRate: 0,
+    subtotal: 0,
+    gst: 0,
+    total: 0,
+    extraKmRate: 0,
+    extraHrRate: 0,
+    driverDA: 0,
+    isOutstation: false,
+    totalKms: 0,
+    totalHours: 0
+  })
 
   // Pre-fill customer details from previous step
   const [customerDetails, setCustomerDetails] = useState({
@@ -33,18 +46,24 @@ export default function PaymentGateway({ bookingData, onBack, onPaymentSuccess }
     address: "",
   })
 
+  useEffect(() => {
+    calculatePricing()
+  }, [bookingData])
+
   // Calculate pricing using utility functions
-  const calculatePricing = () => {
+  const calculatePricing = async () => {
     try {
+      let result: PricingBreakdown | null = null
+
       if (bookingData.serviceType === "self-drive") {
-        return calculateSelfDrivePrice(
+        result = await calculateSelfDrivePrice(
           bookingData.selectedVehicle?.id,
           bookingData.numberOfDays,
           bookingData.estimatedKms || 150
         )
       } else {
         const hours = calculateHours(bookingData.startTime, bookingData.endTime)
-        return calculateChauffeurPrice(
+        result = await calculateChauffeurPrice(
           bookingData.selectedVehicle?.id,
           bookingData.numberOfDays,
           hours,
@@ -52,23 +71,15 @@ export default function PaymentGateway({ bookingData, onBack, onPaymentSuccess }
           bookingData.serviceArea
         )
       }
+
+      if (result) {
+        setPricing(result)
+      }
     } catch (error) {
       console.error('Pricing calculation error:', error)
-      return {
-        baseRate: 0,
-        subtotal: 0,
-        gst: 0,
-        total: 0,
-        advanceAmount: 0,
-        extraKmRate: 0,
-        extraHrRate: 0,
-        driverDA: 0,
-        isOutstation: false
-      }
     }
   }
 
-  const pricing = calculatePricing()
   const advanceAmount = Math.round(pricing.total * 0.25)
 
   const handlePayment = async () => {

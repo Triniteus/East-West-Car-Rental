@@ -160,7 +160,7 @@ export async function getAvailableVehiclesForService(serviceType: 'self-drive' |
             return []
         }
 
-        return data?.map(v => ({
+        return data?.map((v: any) => ({
             id: v.id,
             name: v.name,
             seats: v.seats,
@@ -188,7 +188,7 @@ export async function getAvailableVehiclesForService(serviceType: 'self-drive' |
             return []
         }
 
-        return data?.map(v => ({
+        return data?.map((v: any) => ({
             id: v.id,
             name: v.name,
             seats: v.seats,
