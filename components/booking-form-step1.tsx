@@ -142,9 +142,6 @@ export default function BookingFormStep1({
   }
 
   const handleReset = () => {
-    const today = new Date().toISOString().split("T")[0]
-    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split("T")[0]
-
     setFormData({
       addressLine1: "",
       addressLine2: "",
@@ -154,9 +151,9 @@ export default function BookingFormStep1({
       pickupLocation: "",
       dropLocation: serviceType === "self-drive" ? "" : "",
       stopovers: [""],
-      startDate: today,
+      startDate: "",
       startTime: "09:00",
-      endDate: tomorrow,
+      endDate: "",
       endTime: "18:00",
       numberOfDays: 1,
       roundTrip: false,
@@ -168,6 +165,8 @@ export default function BookingFormStep1({
         outsideMumbai: false,
       },
     })
+    setPickupOption("custom")
+    setDropOption("custom")
   }
 
   const calculateEstimatedPrice = () => {

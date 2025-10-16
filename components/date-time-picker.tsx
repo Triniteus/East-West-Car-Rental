@@ -43,21 +43,30 @@ export default function DateTimePicker({ startDate, endDate, startTime, endTime,
     "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00",
   ]
 
-  // Initialize from props
+  // Sync with props when they change (including reset)
   useEffect(() => {
     if (startDate) {
       setSelectedStartDate(new Date(startDate + 'T00:00:00'))
+    } else {
+      setSelectedStartDate(undefined)
     }
+  }, [startDate])
+
+  useEffect(() => {
     if (endDate) {
       setSelectedEndDate(new Date(endDate + 'T00:00:00'))
+    } else {
+      setSelectedEndDate(undefined)
     }
-    if (startTime) {
-      setSelectedStartTime(startTime)
-    }
-    if (endTime) {
-      setSelectedEndTime(endTime)
-    }
-  }, [])
+  }, [endDate])
+
+  useEffect(() => {
+    setSelectedStartTime(startTime || "09:00")
+  }, [startTime])
+
+  useEffect(() => {
+    setSelectedEndTime(endTime || "18:00")
+  }, [endTime])
 
   // Notify parent of changes
   useEffect(() => {

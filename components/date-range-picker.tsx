@@ -33,6 +33,20 @@ export function DateRangePicker({ startDate, endDate, onChange }: DateRangePicke
         return undefined
     })
 
+    // Sync with props when they change (including reset)
+    React.useEffect(() => {
+        if (startDate && endDate) {
+            setDateRange({
+                from: new Date(startDate + 'T00:00:00'),
+                to: new Date(endDate + 'T00:00:00')
+            })
+            setIsSelectingRange(false)
+        } else if (!startDate && !endDate) {
+            setDateRange(undefined)
+            setIsSelectingRange(false)
+        }
+    }, [startDate, endDate])
+
     const formatDateDDMMYYYY = (date: Date) => {
         const day = String(date.getDate()).padStart(2, '0')
         const month = String(date.getMonth() + 1).padStart(2, '0')
