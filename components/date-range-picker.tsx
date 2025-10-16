@@ -22,6 +22,7 @@ interface DateRangePickerProps {
 export function DateRangePicker({ startDate, endDate, onChange }: DateRangePickerProps) {
     const [open, setOpen] = React.useState(false)
     const isMobile = useIsMobile()
+    const [isSelectingRange, setIsSelectingRange] = React.useState(false)
     const [dateRange, setDateRange] = React.useState<DateRange | undefined>(() => {
         if (startDate && endDate) {
             return {
@@ -46,28 +47,41 @@ export function DateRangePicker({ startDate, endDate, onChange }: DateRangePicke
     }
 
     const handleSelect = (range: DateRange | undefined) => {
-        setDateRange(range)
+        // First click: only 'from' is set
+        if (range?.from && !isSelectingRange) {
+            setDateRange({ from: range.from, to: undefined })
+            setIsSelectingRange(true)
+            return
+        }
 
-        // Only update parent and close when BOTH dates are selected AND they are different
-        if (range?.from && range?.to && range.from.getTime() !== range.to.getTime()) {
-            const startYear = range.from.getFullYear()
-            const startMonth = String(range.from.getMonth() + 1).padStart(2, '0')
-            const startDay = String(range.from.getDate()).padStart(2, '0')
+        // Second click scenario - we're selecting the return date
+        if (isSelectingRange && dateRange?.from) {
+            // If user clicks the same date as pickup OR any other date, set it as return
+            const returnDate = range?.to || range?.from || dateRange.from
+
+            setDateRange({ from: dateRange.from, to: returnDate })
+
+            const startYear = dateRange.from.getFullYear()
+            const startMonth = String(dateRange.from.getMonth() + 1).padStart(2, '0')
+            const startDay = String(dateRange.from.getDate()).padStart(2, '0')
             const formattedStart = `${startYear}-${startMonth}-${startDay}`
 
-            const endYear = range.to.getFullYear()
-            const endMonth = String(range.to.getMonth() + 1).padStart(2, '0')
-            const endDay = String(range.to.getDate()).padStart(2, '0')
+            const endYear = returnDate.getFullYear()
+            const endMonth = String(returnDate.getMonth() + 1).padStart(2, '0')
+            const endDay = String(returnDate.getDate()).padStart(2, '0')
             const formattedEnd = `${endYear}-${endMonth}-${endDay}`
 
             onChange(formattedStart, formattedEnd)
+            setIsSelectingRange(false)
 
             // Auto close after selecting both dates
             setTimeout(() => setOpen(false), 300)
-        } else if (range?.from && range?.to && range.from.getTime() === range.to.getTime()) {
-            // If same date selected, keep it as pickup only and wait for return date
-            setDateRange({ from: range.from, to: undefined })
         }
+    }
+
+    const handleClear = () => {
+        setDateRange(undefined)
+        setIsSelectingRange(false)
     }
 
     const getDayCount = () => {
@@ -158,11 +172,23 @@ export function DateRangePicker({ startDate, endDate, onChange }: DateRangePicke
                         />
                     </div>
                     <div className="p-2 sm:p-2.5 md:p-3 border-t bg-muted/50">
-                        <p className="text-[10px] sm:text-xs text-muted-foreground text-center">
-                            {!dateRange?.from && "Select your pickup date"}
-                            {dateRange?.from && !dateRange?.to && "Now select your return date"}
-                            {dateRange?.from && dateRange?.to && `${getDayCount()} day${getDayCount()! > 1 ? 's' : ''} selected`}
-                        </p>
+                        <div className="flex items-center justify-between gap-2">
+                            <p className="text-[10px] sm:text-xs text-muted-foreground flex-1 text-center">
+                                {!dateRange?.from && "Click a date to select pickup"}
+                                {dateRange?.from && !dateRange?.to && "Click again to select return date (can be same day)"}
+                                {dateRange?.from && dateRange?.to && `${getDayCount()} day${getDayCount()! > 1 ? 's' : ''} selected`}
+                            </p>
+                            {dateRange?.from && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleClear}
+                                    className="h-6 px-2 text-[10px] sm:text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                                >
+                                    Clear
+                                </Button>
+                            )}
+                        </div>
                     </div>
                 </PopoverContent>
             </Popover>
