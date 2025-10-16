@@ -720,7 +720,7 @@ export default function BookingFormStep1({
                     <span>₹{Math.round(pricing.subtotal).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>GST (12%):</span>
+                    <span>GST (5%):</span>
                     <span>₹{Math.round(pricing.gst).toLocaleString()}</span>
                   </div>
                   <div className="border-t border-white/30 pt-1 mt-1">

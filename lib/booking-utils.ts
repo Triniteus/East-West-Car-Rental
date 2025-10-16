@@ -278,7 +278,7 @@ export async function calculateSelfDrivePrice(
     else baseRate = rates.km600
 
     const subtotal = baseRate * days
-    const gst = subtotal * 0.12 // 12% GST for self-drive
+    const gst = subtotal * 0.05 // 5% GST for self-drive
     const total = subtotal + gst
 
     return {
@@ -338,7 +338,7 @@ export async function calculateChauffeurPrice(
     }
 
     const totalBeforeGST = subtotal + driverDA
-    const gst = totalBeforeGST * 0.12 // 12% GST
+    const gst = totalBeforeGST * 0.05 // 5% GST
     const total = totalBeforeGST + gst
 
     return {

@@ -219,7 +219,7 @@ export default function PaymentGateway({ bookingData, onBack, onPaymentSuccess }
                       <span className="text-emerald-900">₹{Math.round(pricing.subtotal).toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-emerald-700">GST (12%):</span>
+                      <span className="text-emerald-700">GST (5%):</span>
                       <span className="text-emerald-900">₹{Math.round(pricing.gst).toLocaleString()}</span>
                     </div>
                     {pricing.driverDA}

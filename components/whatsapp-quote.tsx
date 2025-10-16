@@ -243,7 +243,7 @@ export default function WhatsAppQuote({ bookingData, onBack }: WhatsAppQuoteProp
                           <span>₹{Math.round(pricing.subtotal).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>GST (12%):</span>
+                          <span>GST (5%):</span>
                           <span>₹{Math.round(pricing.gst).toLocaleString()}</span>
                         </div>
                         {pricing.driverDA && (

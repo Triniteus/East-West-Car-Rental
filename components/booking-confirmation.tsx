@@ -271,7 +271,7 @@ Book your ride at eastwestrentals.com`
                             <span>₹{Math.round(actualPricing.subtotal).toLocaleString()}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span>GST (12%):</span>
+                            <span>GST (5%):</span>
                             <span>₹{Math.round(actualPricing.gst).toLocaleString()}</span>
                           </div>
                           {actualPricing.driverDA}
