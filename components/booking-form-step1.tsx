@@ -314,16 +314,16 @@ export default function BookingFormStep1({
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex-shrink-0 mb-4">
-        <h2 className="text-xl md:text-2xl font-bold text-emerald-900 text-center">Plan Your Journey</h2>
+      <div className="flex-shrink-0 mb-3 md:mb-4">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-emerald-900 text-center">Plan Your Journey</h2>
       </div>
 
       {/* Main Content - Scrollable */}
-      <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+      <div className="flex-1 overflow-y-auto space-y-3 md:space-y-4 pr-1 md:pr-2">
         {/* Service Area Selection */}
-        <div className="bg-emerald-50/80 rounded-xl p-4 border border-emerald-200/50">
-          <Label className="text-emerald-900 font-medium text-sm mb-3">Service Area *</Label>
-          <div className="space-y-3">
+        <div className="bg-emerald-50/80 rounded-lg md:rounded-xl p-3 md:p-4 border border-emerald-200/50">
+          <Label className="text-emerald-900 font-medium text-xs sm:text-sm mb-2 md:mb-3 block">Service Area *</Label>
+          <div className="space-y-2 md:space-y-3">
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="withinMumbai"
@@ -331,7 +331,7 @@ export default function BookingFormStep1({
                 onCheckedChange={(checked) => handleServiceAreaChange('withinMumbai', !!checked)}
                 className="border-blue-300"
               />
-              <Label htmlFor="withinMumbai" className="text-emerald-800 font-medium text-sm">
+              <Label htmlFor="withinMumbai" className="text-emerald-800 font-medium text-xs sm:text-sm cursor-pointer">
                 Within Mumbai & Navi Mumbai
               </Label>
             </div>
@@ -353,20 +353,20 @@ export default function BookingFormStep1({
                 onCheckedChange={(checked) => handleServiceAreaChange('outsideMumbai', !!checked)}
                 className="border-blue-300"
               />
-              <Label htmlFor="outsideMumbai" className="text-emerald-800 font-medium text-sm">
+              <Label htmlFor="outsideMumbai" className="text-emerald-800 font-medium text-xs sm:text-sm cursor-pointer">
                 Outside Mumbai (Outstation)
               </Label>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           {/* Left Column - Location Details */}
-          <div className="space-y-3">
+          <div className="space-y-2.5 md:space-y-3">
             {/* Self-Drive Address Fields */}
             {serviceType === "self-drive" ? (
-              <div className="space-y-3">
-                <Label className="text-emerald-800 font-medium flex items-center gap-2 text-sm">
+              <div className="space-y-2.5 md:space-y-3">
+                <Label className="text-emerald-800 font-medium flex items-center gap-2 text-xs sm:text-sm">
                   <MapPin className="w-3 h-3" />
                   Pickup Address *
                 </Label>
@@ -377,7 +377,7 @@ export default function BookingFormStep1({
                     value={formData.addressLine1}
                     onChange={(e) => setFormData((prev) => ({ ...prev, addressLine1: e.target.value }))}
                     placeholder="Address Line 1 *"
-                    className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
+                    className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9 text-xs sm:text-sm"
                     required
                   />
                   <Input
@@ -385,7 +385,7 @@ export default function BookingFormStep1({
                     value={formData.addressLine2}
                     onChange={(e) => setFormData((prev) => ({ ...prev, addressLine2: e.target.value }))}
                     placeholder="Address Line 2 (Optional)"
-                    className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
+                    className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9 text-xs sm:text-sm"
                   />
                   <div className="grid grid-cols-2 gap-2">
                     <Input
@@ -393,7 +393,7 @@ export default function BookingFormStep1({
                       value={formData.city}
                       onChange={(e) => setFormData((prev) => ({ ...prev, city: e.target.value }))}
                       placeholder="City *"
-                      className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
+                      className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9 text-xs sm:text-sm"
                       required
                     />
                     <Input
@@ -401,7 +401,7 @@ export default function BookingFormStep1({
                       value={formData.state}
                       onChange={(e) => setFormData((prev) => ({ ...prev, state: e.target.value }))}
                       placeholder="State *"
-                      className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
+                      className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9 text-xs sm:text-sm"
                       required
                     />
                   </div>
@@ -410,7 +410,7 @@ export default function BookingFormStep1({
                     value={formData.areaCode}
                     onChange={(e) => setFormData((prev) => ({ ...prev, areaCode: e.target.value }))}
                     placeholder="Area Code *"
-                    className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
+                    className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9 text-xs sm:text-sm"
                     required
                   />
                 </div>
@@ -419,7 +419,7 @@ export default function BookingFormStep1({
               // Chauffeur Service Location Fields
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="pickup" className="text-emerald-800 font-medium flex items-center gap-2 text-sm">
+                  <Label htmlFor="pickup" className="text-emerald-800 font-medium flex items-center gap-2 text-xs sm:text-sm">
                     <MapPin className="w-3 h-3" />
                     Pickup Location *
                   </Label>
@@ -440,7 +440,7 @@ export default function BookingFormStep1({
                     }}
                     disabled={formData.roundTrip}
                   >
-                    <SelectTrigger className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9">
+                    <SelectTrigger className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9 text-xs sm:text-sm">
                       <SelectValue placeholder="Select pickup option" />
                     </SelectTrigger>
                     <SelectContent>
@@ -451,11 +451,11 @@ export default function BookingFormStep1({
 
                   {/* Show Hub Address or Custom Input */}
                   {pickupOption === "hub" ? (
-                    <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                      <p className="text-sm text-emerald-800 font-medium">
+                    <div className="p-2.5 md:p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                      <p className="text-xs sm:text-sm text-emerald-800 font-medium">
                         📍 East West Car Rental Hub
                       </p>
-                      <p className="text-xs text-emerald-600 mt-1">
+                      <p className="text-[10px] sm:text-xs text-emerald-600 mt-1">
                         Chembur, Mumbai, Maharashtra
                       </p>
                     </div>
@@ -465,7 +465,7 @@ export default function BookingFormStep1({
                       value={formData.pickupLocation}
                       onChange={(e) => setFormData((prev) => ({ ...prev, pickupLocation: e.target.value }))}
                       placeholder="Enter custom pickup location"
-                      className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
+                      className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9 text-xs sm:text-sm"
                       required
                       disabled={formData.roundTrip}
                     />
@@ -473,7 +473,7 @@ export default function BookingFormStep1({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="drop" className="text-emerald-800 font-medium flex items-center gap-2 text-sm">
+                  <Label htmlFor="drop" className="text-emerald-800 font-medium flex items-center gap-2 text-xs sm:text-sm">
                     <MapPin className="w-3 h-3" />
                     Drop Location *
                   </Label>
@@ -494,7 +494,7 @@ export default function BookingFormStep1({
                         }
                       }}
                     >
-                      <SelectTrigger className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9">
+                      <SelectTrigger className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9 text-xs sm:text-sm">
                         <SelectValue placeholder="Select drop option" />
                       </SelectTrigger>
                       <SelectContent>
@@ -506,17 +506,17 @@ export default function BookingFormStep1({
 
                   {/* Show Hub Address or Custom Input or Round Trip Message */}
                   {formData.roundTrip ? (
-                    <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                      <p className="text-xs text-emerald-600">
+                    <div className="p-2.5 md:p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                      <p className="text-[10px] sm:text-xs text-emerald-600">
                         🔄 Round trip: Drop location same as pickup
                       </p>
                     </div>
                   ) : dropOption === "hub" ? (
-                    <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                      <p className="text-sm text-emerald-800 font-medium">
+                    <div className="p-2.5 md:p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                      <p className="text-xs sm:text-sm text-emerald-800 font-medium">
                         📍 East West Car Rental Hub
                       </p>
-                      <p className="text-xs text-emerald-600 mt-1">
+                      <p className="text-[10px] sm:text-xs text-emerald-600 mt-1">
                         Chembur, Mumbai, Maharashtra
                       </p>
                     </div>
@@ -526,7 +526,7 @@ export default function BookingFormStep1({
                       value={formData.dropLocation}
                       onChange={(e) => setFormData((prev) => ({ ...prev, dropLocation: e.target.value }))}
                       placeholder="Enter custom drop location"
-                      className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
+                      className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9 text-xs sm:text-sm"
                       required
                     />
                   )}
@@ -553,14 +553,14 @@ export default function BookingFormStep1({
             {/* Stopovers - Only for Chauffeur Service and not Round Trip */}
             {serviceType === "chauffeur" && !formData.roundTrip && (
               <div className="space-y-1">
-                <Label className="text-emerald-800 font-medium text-sm">Add Stopover (Optional)</Label>
+                <Label className="text-emerald-800 font-medium text-xs sm:text-sm">Add Stopover (Optional)</Label>
                 {formData.stopovers.slice(0, 2).map((stopover: string, index: number) => (
                   <div key={index} className="flex gap-2">
                     <Input
                       value={stopover}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateStopover(index, e.target.value)}
                       placeholder="Enter stopover location"
-                      className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9"
+                      className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9 text-xs sm:text-sm"
                     />
                     {formData.stopovers.length > 1 && (
                       <Button
@@ -581,7 +581,7 @@ export default function BookingFormStep1({
                     variant="outline"
                     size="sm"
                     onClick={addStopover}
-                    className="rounded-lg border-emerald-300 text-emerald-600 hover:bg-emerald-50 bg-transparent h-8"
+                    className="rounded-lg border-emerald-300 text-emerald-600 hover:bg-emerald-50 bg-transparent h-8 text-xs sm:text-sm"
                   >
                     <Plus className="w-3 h-3 mr-1" />
                     Add Stopover
@@ -592,14 +592,14 @@ export default function BookingFormStep1({
 
             {/* Round Trip - Only for Chauffeur Service */}
             {serviceType === "chauffeur" && (
-              <div className="flex items-center space-x-2 p-3 bg-emerald-50/50 rounded-lg">
+              <div className="flex items-center space-x-2 p-2.5 md:p-3 bg-emerald-50/50 rounded-lg">
                 <Checkbox
                   id="roundTrip"
                   checked={formData.roundTrip}
                   onCheckedChange={handleRoundTripChange}
                   className="border-emerald-400"
                 />
-                <Label htmlFor="roundTrip" className="text-emerald-800 font-medium text-sm cursor-pointer">
+                <Label htmlFor="roundTrip" className="text-emerald-800 font-medium text-xs sm:text-sm cursor-pointer">
                   Round Trip (Return to pickup location)
                 </Label>
               </div>
@@ -618,34 +618,58 @@ export default function BookingFormStep1({
                 />
 
                 {/* Time Selection for Self-Drive */}
-                <div className="space-y-3">
+                <div className="space-y-2.5 md:space-y-3">
                   <div>
-                    <Label className="text-emerald-800 font-medium text-sm mb-2 block">Pickup Time</Label>
+                    <Label className="text-emerald-800 font-medium text-xs sm:text-sm mb-2 block">Pickup Time</Label>
                     <Input
                       type="time"
                       value={formData.startTime}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, startTime: e.target.value }))}
-                      className="rounded-lg border-emerald-300 focus:border-emerald-500"
+                      onChange={(e) => {
+                        const newStartTime = e.target.value
+                        setFormData((prev) => {
+                          // If same day and return time is earlier than new pickup time, update return time
+                          if (prev.startDate === prev.endDate && prev.endTime <= newStartTime) {
+                            const [hour] = newStartTime.split(':')
+                            const nextHour = String(parseInt(hour) + 1).padStart(2, '0')
+                            return { ...prev, startTime: newStartTime, endTime: `${nextHour}:00` }
+                          }
+                          return { ...prev, startTime: newStartTime }
+                        })
+                      }}
+                      className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9 text-xs sm:text-sm"
                     />
                   </div>
                   <div>
-                    <Label className="text-emerald-800 font-medium text-sm mb-2 block">Return Time</Label>
+                    <Label className="text-emerald-800 font-medium text-xs sm:text-sm mb-2 block">Return Time</Label>
                     <Input
                       type="time"
                       value={formData.endTime}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, endTime: e.target.value }))}
-                      className="rounded-lg border-emerald-300 focus:border-emerald-500"
+                      onChange={(e) => {
+                        const newEndTime = e.target.value
+                        // If same day, only allow times after pickup time
+                        if (formData.startDate === formData.endDate && newEndTime <= formData.startTime) {
+                          return // Don't update if trying to select invalid time
+                        }
+                        setFormData((prev) => ({ ...prev, endTime: newEndTime }))
+                      }}
+                      min={formData.startDate === formData.endDate ? formData.startTime : undefined}
+                      className="rounded-lg border-emerald-300 focus:border-emerald-500 h-9 text-xs sm:text-sm"
                     />
                   </div>
+                  {formData.startDate === formData.endDate && (
+                    <div className="text-[10px] text-amber-600 bg-amber-50 p-2 rounded">
+                      Same-day rental: Return time must be after pickup time
+                    </div>
+                  )}
                 </div>
 
                 {/* Duration Summary for Self-Drive */}
                 {formData.startDate && formData.endDate && (
-                  <div className="p-3 bg-emerald-100 text-emerald-900 rounded-lg border border-emerald-300">
-                    <div className="text-sm font-medium">
+                  <div className="p-2.5 md:p-3 bg-emerald-100 text-emerald-900 rounded-lg border border-emerald-300">
+                    <div className="text-xs sm:text-sm font-medium">
                       {formData.numberOfDays} Day{formData.numberOfDays > 1 ? "s" : ""} Rental
                     </div>
-                    <div className="text-xs text-emerald-700 mt-1">
+                    <div className="text-[10px] sm:text-xs text-emerald-700 mt-1">
                       {formData.startDate.split('-').reverse().join('-')} at {formData.startTime} → {formData.endDate.split('-').reverse().join('-')} at {formData.endTime}
                     </div>
                   </div>
@@ -654,7 +678,7 @@ export default function BookingFormStep1({
             ) : (
               // Chauffeur: Full Date Time Picker
               <div>
-                <h3 className="text-sm font-semibold text-emerald-900 mb-3">Select Dates & Times</h3>
+                <h3 className="text-xs sm:text-sm font-semibold text-emerald-900 mb-2 md:mb-3">Select Dates & Times</h3>
                 <DateTimePicker
                   startDate={formData.startDate}
                   endDate={formData.endDate}
@@ -669,29 +693,29 @@ export default function BookingFormStep1({
 
         {/* Price Preview */}
         {pricing && (
-          <div className="bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl p-4">
+          <div className="bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-lg md:rounded-xl p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-lg font-bold">
+                <div className="text-base sm:text-lg md:text-xl font-bold">
                   ₹{Math.round(pricing.total).toLocaleString()}
                 </div>
-                <div className="text-emerald-100 text-sm">Estimated Total</div>
+                <div className="text-emerald-100 text-xs sm:text-sm">Estimated Total</div>
               </div>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowPriceBreakdown(!showPriceBreakdown)}
-                className="text-white hover:bg-white/20 h-8 w-8 p-0 rounded-full"
+                className="text-white hover:bg-white/20 h-7 w-7 sm:h-8 sm:w-8 p-0 rounded-full"
               >
-                <Info className="w-4 h-4" />
+                <Info className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </Button>
             </div>
 
             {/* Price Breakdown Overlay */}
             {showPriceBreakdown && (
-              <div className="mt-3 p-3 bg-white/20 rounded-lg backdrop-blur-sm">
-                <div className="text-sm space-y-1">
+              <div className="mt-2.5 md:mt-3 p-2.5 md:p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                <div className="text-xs sm:text-sm space-y-1">
                   <div className="flex justify-between">
                     <span>Base Amount:</span>
                     <span>₹{Math.round(pricing.subtotal).toLocaleString()}</span>
@@ -715,19 +739,19 @@ export default function BookingFormStep1({
       </div>
 
       {/* Action Buttons - Fixed at bottom */}
-      <div className="flex-shrink-0 flex gap-3 pt-4 mt-4">
+      <div className="flex-shrink-0 flex gap-2 sm:gap-3 pt-3 md:pt-4 mt-3 md:mt-4">
         <Button
           type="button"
           variant="outline"
           onClick={handleReset}
-          className="flex-1 rounded-lg border-emerald-300 text-emerald-600 hover:bg-emerald-50 bg-transparent h-9"
+          className="flex-1 rounded-lg border-emerald-300 text-emerald-600 hover:bg-emerald-50 bg-transparent h-9 text-xs sm:text-sm"
         >
           <RotateCcw className="w-3 h-3 mr-1" />
           Reset
         </Button>
         <Button
           onClick={handleContinue}
-          className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg h-9"
+          className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg h-9 text-xs sm:text-sm"
         >
           Continue
         </Button>
